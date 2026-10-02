@@ -1,0 +1,45 @@
+/* DATA FUSE specific HUD layout on top of cyber-kit/ui/hud.css */
+.hud-center { width: min(340px, 34vw); }
+.zone-name { margin-top: 6px; font-family: var(--font-zh); font-size: 12px; letter-spacing: 4px; color: color-mix(in srgb, var(--c1) 75%, white); text-shadow: 0 0 8px var(--c1); opacity: .85; }
+#hud-next { font-family: 'Orbitron', sans-serif; font-weight: 900; color: #fff; text-shadow: 0 0 8px var(--c3); }
+
+.df-bar { position: absolute; left: max(16px, env(safe-area-inset-left)); right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); display: flex; justify-content: space-between; align-items: flex-end; pointer-events: none; }
+.df-bar .hud-buttons { position: static; }
+.df-undo { position: relative; display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 18px 0 12px; pointer-events: auto; cursor: pointer; color: #fff;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--c1) 22%, rgba(10,4,30,.7)), rgba(10,4,30,.55)); border: 1px solid color-mix(in srgb, var(--c1) 70%, transparent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--c1) 40%, transparent), inset 0 0 14px color-mix(in srgb, var(--c1) 15%, transparent);
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); transition: transform .1s, filter .2s, opacity .2s; }
+.df-undo svg { width: 26px; height: 26px; stroke: var(--c1); filter: drop-shadow(0 0 4px var(--c1)); }
+.df-undo-txt { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1; }
+.df-undo-txt b { font-family: var(--font-zh); font-size: 16px; letter-spacing: 3px; }
+.df-undo-txt small { font-family: 'Orbitron', sans-serif; font-size: 9px; letter-spacing: 3px; color: var(--c1); }
+.df-badge { min-width: 24px; height: 24px; padding: 0 6px; display: inline-flex; align-items: center; justify-content: center; font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 13px;
+  color: #10061a; background: var(--c3); box-shadow: 0 0 10px var(--c3); border-radius: 12px; }
+.df-badge.ad { background: #ff4fd8; box-shadow: 0 0 10px #ff4fd8; font-size: 10px; letter-spacing: 1px; }
+.df-undo:active { transform: scale(.96); }
+.df-undo.disabled { opacity: .38; filter: saturate(.3); }
+.df-undo:hover { filter: brightness(1.2); }
+
+#screen-start .neon-btn + .neon-btn, .screen.hero .neon-btn + .neon-btn { margin-top: 12px !important; }
+#btn-continue small { font-size: 9px; }
+.screen.hero .panel { max-width: 560px; }
+.title { font-size: clamp(56px, 10vw, 124px); }
+
+.popup.merge { font-size: 18px; }
+.popup.big { font-size: 30px; }
+
+@media (max-width: 760px) {
+  .demo-tag { top: auto !important; bottom: calc(max(16px, env(safe-area-inset-bottom)) + 64px) !important; }
+  .hud-center { top: calc(max(10px, env(safe-area-inset-top)) + 74px); bottom: auto; width: min(320px, 78vw); }
+  .level-progress { padding: 6px 12px 8px; }
+  .zone-name { font-size: 11px; margin-top: 4px; }
+  .df-undo { height: 48px; padding: 0 14px 0 10px; }
+  .screen.hero { align-items: flex-end; padding-bottom: max(36px, env(safe-area-inset-bottom)); background: linear-gradient(180deg, rgba(5,1,15,0) 0%, rgba(5,1,15,.35) 35%, rgba(5,1,15,.92) 72%); }
+  .title { font-size: 64px; letter-spacing: 8px; }
+  .tagline { font-size: 13px; margin-bottom: 14px; }
+  .controls { margin-top: 14px; line-height: 1.9; }
+  .controls div:not(.touch-hint) { display: none; }
+}
+@media (max-height: 560px) and (min-width: 761px) {
+  .controls { display: none; }
+}
