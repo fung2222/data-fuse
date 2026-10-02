@@ -1,13 +1,14 @@
 // DATA FUSE 數據熔合 — game controller: states, input, undo, milestones, camera, effects, saves, ads hooks.
 import * as THREE from 'three';
 import {
-  flags, createStore, createStage, ThemeController, themeFor, U, Particles, Shockwaves, FxState, NeonCity,
+  i18n, t, themeLabel, flags, createStore, createStage, ThemeController, themeFor, U, Particles, Shockwaves, FxState, NeonCity,
   createInput, CyberUI, Platform, createAds,
 } from 'cyber-kit';
 import {
   GAME_ID, SIZE, UNDO_DEPTH, UNDO_FREE, UNDO_REWARD, MILESTONES, AI_DEMO_INTERVAL, AI_ATTRACT_INTERVAL, AI_DEPTH,
-  BOARD_Y, BOARD_HALF, ADS, colorOf, tierOf,
+  BOARD_Y, BOARD_HALF, ADS, colorOf, tierOf, zoneForTile, nextMilestone, prevMilestone, fourChanceFor,
 } from './config.js';
+import './strings.js';
 import { FuseGame, makeRng } from './logic.js';
 import { aiChoose } from './ai.js';
 import { BoardView, cellPos } from './board.js';
@@ -64,21 +65,19 @@ function saveRun() {
 }
 function loadRun() { const s = store.getJSON('save'); return s && s.v === 1 && s.snap && Array.isArray(s.snap.values) ? s : null; }
 
-function zoneForTile(v) { let z = 1; for (const m of MILESTONES) if (v >= m) z++; return z; }
-function nextMilestone(v) { return MILESTONES.find(m => m > v) || v * 2; }
 
 // ------------------------------------------------------------------ HUD
 function updateHUD(bump = false) {
-  const g = S.game;
+  const g = S.game; g.fourChance = fourChanceFor(S.zone);
   ui.setText('hud-score', g.score.toLocaleString('en-US'));
   ui.setText('hud-best', Math.max(store.best, g.score).toLocaleString('en-US'));
   ui.setText('hud-zone', S.zone);
   ui.setText('hud-core', fmt(g.maxTile));
-  const nm = nextMilestone(g.maxTile), prev = MILESTONES[MILESTONES.indexOf(nm) - 1] || 2;
+  const nm = nextMilestone(g.maxTile), prev = prevMilestone(g.maxTile);
   ui.setText('hud-next', fmt(nm));
   const p = Math.max(0, Math.min(1, (Math.log2(g.maxTile) - Math.log2(prev)) / (Math.log2(nm) - Math.log2(prev))));
   $('hud-progress').style.width = (g.maxTile >= prev ? p * 100 : (Math.log2(g.maxTile) / Math.log2(nm)) * 100).toFixed(1) + '%';
-  ui.setText('hud-zone-name', `${themeFor(S.zone).name} · ${themeFor(S.zone).en}`);
+  ui.setText('hud-zone-name', themeLabel(themeFor(S.zone)) + (S.zone > MILESTONES.length + 1 ? ' · ' + t('endless') : ''));
   const badge = $('undo-badge'), btn = $('btn-undo');
   if (S.undo > 0) { badge.textContent = S.undo; badge.classList.remove('ad'); }
   else { badge.textContent = ads.isNative ? 'AD' : '+3'; badge.classList.add('ad'); }
@@ -88,9 +87,10 @@ function updateHUD(bump = false) {
 function refreshStart() {
   const s = loadRun();
   $('btn-continue').classList.toggle('hidden', !s);
-  if (s) ui.setText('continue-sub', `CONTINUE · ${s.snap.score.toLocaleString('en-US')} 分`);
+  if (s) ui.setText('continue-sub', t('continueS', { score: s.snap.score.toLocaleString('en-US') }));
   ui.setText('start-best', store.best.toLocaleString('en-US'));
   ui.setText('start-tile', S.bestTile ? fmt(S.bestTile) : '—');
+  ui.setText('start-zone', S.bestTile >= 128 ? zoneForTile(S.bestTile) : '—');
 }
 
 // ------------------------------------------------------------------ flow
@@ -179,15 +179,16 @@ function onMerge(m, pos, chain, live) {
 function reachMilestone(v) {
   theme.set(S.zone); audio.setLevel(S.zone); audio.levelUp();
   const th = themeFor(S.zone);
-  const special = v === 2048 ? '傳說核心！LEGENDARY CORE' : v >= 4096 ? '超越極限 BEYOND LIMITS' : `進入 ${th.name} · ENTERING ${th.en}`;
-  ui.banner(`${fmt(v)} 熔合`, `ZONE ${S.zone} · 新區域`, special);
+  const special = v === 2048 ? t('legendary') : v > MILESTONES[MILESTONES.length - 1] ? t('endlessZone', { n: S.zone }) : v >= 4096 ? t('beyond') : t('entering', { name: themeLabel(th) });
+  ui.banner(t('fuseN', { v: fmt(v) }), t('zoneN', { n: S.zone }), special);
+  S.game.fourChance = fourChanceFor(S.zone);
   ui.flash(`rgba(255,255,255,${v >= 2048 ? 0.55 : 0.28})`, 420);
   fx.kick({ trauma: 0.3, aberr: 1, glitch: 0.5, fovKick: 1 });
   const c = new THREE.Color(colorOf(v));
   particles.ring(new THREE.Vector3(0, BOARD_Y + 0.1, 0), c, 160, 9, BOARD_Y + 0.1);
   waves.spawn(new THREE.Vector3(0, BOARD_Y, 0), c, { r0: 1, r1: 14, h: 2.2, dur: 1.1, a: 3 });
   city.pulse(0, -6, 2.2);
-  if (S.undo < UNDO_FREE) { S.undo++; ui.toast('區域獎勵：復原 +1 · ZONE BONUS UNDO +1', 2200); }
+  if (S.undo < UNDO_FREE) { S.undo++; ui.toast(t('zoneBonus'), 2200); }
   Platform.haptic('success');
 }
 
@@ -206,7 +207,7 @@ function gameOver() {
     $('newrecord').classList.toggle('hidden', !(S.game.score >= store.best && S.game.score > 0 && S.newRecord));
     const canRevive = S.history.length > 0 && ads.rewardedAvailable();
     $('btn-revive').classList.toggle('hidden', !canRevive);
-    ui.setText('revive-sub', ads.isNative ? 'REWIND · 睇段廣告' : 'REWIND · 免費 FREE');
+    ui.setText('revive-sub', t(ads.isNative ? 'rewindAd' : 'rewindFree'));
     setState('over');
   }, 520);
 }
@@ -215,24 +216,24 @@ async function revive() {
   if (S.state !== 'over' || !S.history.length) return;
   audio.click();
   const r = await ads.rewarded('revive');
-  if (!r.rewarded) { ui.toast('冇攞到獎勵 · NO REWARD'); return; }
+  if (!r.rewarded) { ui.toast(t('noReward')); return; }
   const snap = S.history[0]; S.history = [];
   S.game.restore(snap); board.sync(S.game, true); board.setDim(1); board.danger = 0.45;
   S.zone = zoneForTile(S.game.maxTile);
   setState('playing'); updateHUD(); saveRun(); audio.undo(); audio.unduckMusic();
-  ui.toast('已倒帶 · REWOUND', 1400);
+  ui.toast(t('rewound'), 1400);
 }
 
 async function undo() {
   if (S.state !== 'playing' || S.demo || ui.modalOpen) return;
-  if (!S.history.length) { audio.denied(); ui.toast('冇步可以復原 · NOTHING TO UNDO'); return; }
+  if (!S.history.length) { audio.denied(); ui.toast(t('nothingUndo')); return; }
   if (S.undo <= 0) {
     const ok = await ui.confirm(ads.isNative
-      ? { kicker: 'UNDO', title: '補充 3 次復原？', text: '睇一段自願觀看嘅獎勵廣告即可補充。唔睇都可以照玩。', ok: '睇廣告', okSmall: 'WATCH AD · +3', cancel: '唔使喇', cancelSmall: 'NO THANKS' }
-      : { kicker: 'UNDO', title: '補充 3 次復原', text: '網頁版免費補充。(App 版會用自願觀看嘅獎勵廣告。)', ok: '領取', okSmall: 'CLAIM · +3', cancel: '唔使喇', cancelSmall: 'NO THANKS' });
+      ? { kicker: 'UNDO', title: t('undoMoreQ'), text: t('adText'), ok: t('kit.watchAd'), okSmall: '+3', cancel: t('kit.noThanks'), cancelSmall: '' }
+      : { kicker: 'UNDO', title: t('undoMore'), text: t('freeText'), ok: t('claim'), okSmall: '+3', cancel: t('kit.noThanks'), cancelSmall: '' });
     if (!ok) return;
     const r = await ads.rewarded('undo');
-    if (!r.rewarded) { ui.toast('冇攞到獎勵 · NO REWARD'); return; }
+    if (!r.rewarded) { ui.toast(t('noReward')); return; }
     S.undo += UNDO_REWARD; updateHUD();
     if (S.state !== 'playing') return;
   }
@@ -253,7 +254,7 @@ function toMenu() { saveRun(); audio.back(); showAttract(); }
 async function newGameConfirm() {
   if (S.state !== 'playing' || ui.modalOpen) return;
   if (S.game.moves > 0 && !S.demo) {
-    const ok = await ui.confirm({ kicker: 'NEW GAME', title: '開新一局？', text: '目前呢局會清除。', ok: '開新一局', okSmall: 'NEW GAME', cancel: '繼續玩', cancelSmall: 'KEEP PLAYING' });
+    const ok = await ui.confirm({ kicker: 'NEW GAME', title: t('newQ'), text: t('newText'), ok: t('newGame'), okSmall: '', cancel: t('keepPlaying'), cancelSmall: '' });
     if (!ok) return;
   }
   beginRun(false);
@@ -266,7 +267,7 @@ async function retry() {
 }
 async function overToMenu() { if (S.state !== 'over') return; await ads.naturalBreak('gameover'); showAttract(); }
 
-S.api = { move: (d) => doMove(d), undo: () => undo(), forceOver: () => { S.game.restore({ values: Array.from({ length: SIZE * SIZE }, (_, i) => ((Math.floor(i / SIZE) + i) % 2 ? 4 : 2) * (i === 0 ? 8 : 1)), score: S.game.score, moves: S.game.moves, maxTile: 0 }); board.sync(S.game); gameOver(); } };
+S.api = { endlessTest: () => { const v = Array(SIZE * SIZE).fill(0); v[0] = v[1] = 131072; v[5] = 2; S.game.restore({ values: v, score: S.game.score, moves: S.game.moves, maxTile: 131072 }); S.zone = zoneForTile(131072); board.sync(S.game, true); doMove('left'); }, move: (d) => doMove(d), undo: () => undo(), forceOver: () => { S.game.restore({ values: Array.from({ length: SIZE * SIZE }, (_, i) => ((Math.floor(i / SIZE) + i) % 2 ? 4 : 2) * (i === 0 ? 8 : 1)), score: S.game.score, moves: S.game.moves, maxTile: 0 }); board.sync(S.game); gameOver(); } };
 
 // ------------------------------------------------------------------ input
 createInput({
@@ -292,6 +293,8 @@ ui.on('btn-pause', pause);
 ui.on('btn-mute', toggleMute);
 ui.on('btn-undo', undo);
 ui.on('btn-new', newGameConfirm);
+i18n.bindToggle($('btn-lang')); i18n.bindToggle($('btn-lang2'));
+i18n.onChange(() => { updateHUD(); if (S.state === 'attract') refreshStart(); if (S.state === 'over') ui.setText('revive-sub', t(ads.isNative ? 'rewindAd' : 'rewindFree')); });
 ui.on('btn-retry', retry);
 ui.on('btn-menu', overToMenu);
 ui.on('btn-revive', revive);
@@ -308,7 +311,7 @@ Platform.onPause(() => { saveRun(); if (S.state === 'playing' && !S.demo) pause(
 // ------------------------------------------------------------------ camera
 const camPos = new THREE.Vector3(0, 20, 14), camLook = new THREE.Vector3(0, BOARD_Y, 0);
 const tmpP = new THREE.Vector3(), tmpL = new THREE.Vector3();
-function frameCamera(dt, t, instant = false) {
+function frameCamera(dt, now, instant = false) {
   const aspect = stage.width / stage.height, portrait = aspect < 0.9;
   const attract = S.state === 'attract';
   const vfov = portrait ? 50 : 42;
@@ -320,9 +323,9 @@ function frameCamera(dt, t, instant = false) {
   const dW = halfW / (tanH * (portrait ? 0.97 : 0.9)) + halfW * Math.cos(pitch);
   const dH = halfW * Math.sin(pitch) / (tanV * usable) + halfW * Math.cos(pitch);
   let d = Math.max(dW, dH);
-  let yaw = Math.sin(t * 0.13) * 0.035, lx = 0, lz = portrait ? -0.45 : 0;
+  let yaw = Math.sin(now * 0.13) * 0.035, lx = 0, lz = portrait ? -0.45 : 0;
   if (attract) {
-    yaw = Math.sin(t * 0.12) * 0.4; d *= portrait ? 1.1 : 1.3;
+    yaw = Math.sin(now * 0.12) * 0.4; d *= portrait ? 1.1 : 1.3;
     if (!portrait) lx = -BOARD_HALF * 0.95; else lz = 2.2;
   }
   tmpL.set(lx, BOARD_Y, lz);
@@ -331,12 +334,12 @@ function frameCamera(dt, t, instant = false) {
   const k = instant ? 1 : 1 - Math.exp(-dt * 3);
   camPos.lerp(tmpP, k); camLook.lerp(tmpL, k);
   camera.position.copy(camPos); camera.lookAt(camLook);
-  fx.shake(camera, t, 0.6);
+  fx.shake(camera, now, 0.6);
 }
 
 // ------------------------------------------------------------------ loop
-function tick(dt, t) {
-  S.t = t; U.uTime.value = t;
+function tick(dt, now) {
+  S.t = now; U.uTime.value = now;
   theme.update(dt); fx.update(dt);
   // autopilots
   if (S.state === 'attract') {
@@ -350,11 +353,11 @@ function tick(dt, t) {
     S.aiT += dt;
     if (S.aiT > AI_DEMO_INTERVAL) { S.aiT = 0; const d = aiChoose(S.game.values(), AI_DEPTH); if (d) doMove(d); }
   }
-  board.update(dt, t);
+  board.update(dt, now);
   particles.update(dt); waves.update(dt);
-  city.update(t, dt, camera);
-  frameCamera(dt, t);
-  fx.applyPost(stage, t);
+  city.update(now, dt, camera);
+  frameCamera(dt, now);
+  fx.applyPost(stage, now);
   ui.tick(dt);
   stage.render(dt);
 }
@@ -370,4 +373,4 @@ async function boot() {
   if (flags.fps) $('fps').classList.remove('hidden');
   ads.init().catch(() => {});
 }
-boot().catch((e) => { console.error(e); ui.fatal('載入失敗 Failed to start: ' + e.message); });
+boot().catch((e) => { console.error(e); ui.fatal(t('fatal') + ': ' + e.message); });

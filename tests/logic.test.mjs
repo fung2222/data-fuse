@@ -18,4 +18,11 @@ eq(g.score, 4, 'score accumulates');
 const f = new FuseGame({ rng: makeRng(42) }); let ok = true;
 for (let i = 0; i < 3000 && !f.over; i++) { const before = f.values().reduce((a, b) => a + b, 0); const res = f.move(['up', 'left', 'down', 'right'][i % 4]); if (!res) continue; const after = f.values().reduce((a, b) => a + b, 0); if (after !== before + (res.spawned ? res.spawned.v : 0)) ok = false; }
 eq(ok, true, 'fuzz: value sum invariant');
-console.log(fails ? `\n${fails} FAILED` : '\nALL PASSED'); process.exit(fails ? 1 : 0);
+// endless: procedural zones beyond the authored milestone list, capped spawn curve
+import('../js/config.js').then(({ zoneForTile, nextMilestone, fourChanceFor, MILESTONES }) => {
+  eq(MILESTONES.map(zoneForTile), MILESTONES.map((m, i) => i + 2), 'zoneForTile matches authored milestones');
+  eq([zoneForTile(262144), zoneForTile(1 << 20), nextMilestone(131072), nextMilestone(64), nextMilestone(128)], [13, 15, 262144, 128, 256], 'endless zones continue past 131072');
+  eq([fourChanceFor(1), fourChanceFor(6), fourChanceFor(10), fourChanceFor(99)], [0.1, 0.1, 0.14, 0.2], 'four-spawn chance capped at 20%');
+  const z = new FuseGame({ rng: makeRng(3) }); z.fourChance = 1; z.reset(); eq(z.values().filter(v => v).every(v => v === 4), true, 'fourChance honoured');
+  console.log(fails ? `\n${fails} FAILED` : '\nALL PASSED'); process.exit(fails ? 1 : 0);
+});

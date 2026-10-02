@@ -1,0 +1,25 @@
+// DATA FUSE string table {key: [zh-HK, en]} — cyber-kit v0.2.1 i18n.
+import { i18n } from 'cyber-kit';
+i18n.add({
+  'doc.title': ['數據熔合 DATA FUSE · 賽博朋克 3D 合併解壓', 'DATA FUSE · cyberpunk 3D merge puzzle'],
+  score: ['分數', 'SCORE'], best: ['最高分', 'BEST'], zone: ['區域', 'ZONE'], core: ['核心', 'CORE'], nextFuse: ['下一熔合', 'NEXT FUSE'],
+  undo: ['復原', 'UNDO'], undoS: ['UNDO · Z', 'Z'], undoTip: ['復原 (Z / Backspace)', 'Undo (Z / Backspace)'],
+  newTip: ['新一局 (R)', 'New game (R)'], pauseTip: ['暫停 (P / Esc)', 'Pause (P / Esc)'], muteTip: ['靜音 (M)', 'Mute (M)'],
+  title: ['數據熔合', 'DATA FUSE'], titleEn: ['DATA FUSE', '數據熔合'],
+  tagline: ['滑動合併發光數據方塊，熔出更強嘅核心。<br>冇時間限制、冇終點 —— 區域無盡，慢慢嚟。', 'Swipe to merge glowing data blocks into stronger cores.<br>No timer, no finish line — zones go on forever. Relax.'],
+  continue: ['繼續上局', 'CONTINUE'], continueS: ['{score} 分', '{score} PTS'], start: ['開始遊戲', 'START'], startS: ['START · ENTER', 'ENTER'],
+  touchHint: ['手機：喺畫面任何位置滑動', 'Touch: swipe anywhere'],
+  keysHint: ['<kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> / <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 移動　<kbd>Z</kbd> 復原　<kbd>P</kbd> 暫停　<kbd>M</kbd> 靜音', '<kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> / <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move　<kbd>Z</kbd> undo　<kbd>P</kbd> pause　<kbd>M</kbd> mute'],
+  bestTile: ['最強核心', 'BEST CORE'], bestZone: ['最遠區域（無盡紀錄）', 'ENDLESS BEST ZONE'], bestTileRun: ['最強核心', 'BEST CORE'], moves: ['步數', 'MOVES'],
+  pausedS: ['PAUSED', '已暫停'], saved: ['進度已儲存', 'progress saved'],
+  overK: ['GRID SATURATED', '網格飽和'], over: ['系統飽和', 'NO MOVES'], overS: ['NO MOVES', '系統飽和'],
+  rewind: ['倒帶 3 步繼續', 'REWIND 3 & CONTINUE'], rewindAd: ['睇段廣告', 'WATCH AD'], rewindFree: ['免費', 'FREE'], retry: ['再嚟一鋪', 'RETRY'],
+  fuseN: ['{v} 熔合', '{v} FUSED'], zoneN: ['第 {n} 區 · 新區域', 'ZONE {n} · NEW DISTRICT'],
+  legendary: ['傳說核心！', 'LEGENDARY CORE!'], beyond: ['超越極限', 'BEYOND LIMITS'], endlessZone: ['無盡區域 {n}', 'ENDLESS ZONE {n}'], entering: ['進入 {name}', 'ENTERING {name}'],
+  zoneBonus: ['區域獎勵：復原 +1', 'ZONE BONUS: UNDO +1'], noReward: ['冇攞到獎勵', 'No reward'], rewound: ['已倒帶', 'REWOUND'], nothingUndo: ['冇步可以復原', 'Nothing to undo'],
+  undoMoreQ: ['補充 3 次復原？', 'Refill 3 undos?'], undoMore: ['補充 3 次復原', 'Refill 3 undos'],
+  adText: ['睇一段自願觀看嘅獎勵廣告即可補充。唔睇都可以照玩。', 'Watch an optional rewarded ad to refill. You can keep playing without it.'],
+  freeText: ['網頁版免費補充。(App 版會用自願觀看嘅獎勵廣告。)', 'Free on the web. (The app uses an optional rewarded ad.)'], claim: ['領取', 'CLAIM'],
+  newQ: ['開新一局？', 'Start a new game?'], newText: ['目前呢局會清除。', 'The current game will be cleared.'], newGame: ['開新一局', 'NEW GAME'], keepPlaying: ['繼續玩', 'KEEP PLAYING'],
+  endless: ['無盡', 'ENDLESS'], fatal: ['載入失敗', 'Failed to start'],
+});

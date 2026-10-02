@@ -13,7 +13,7 @@ export function makeRng(seed) {
 }
 
 export class FuseGame {
-  constructor({ rng = Math.random } = {}) { this.rng = rng; this.nextId = 1; this.reset(); }
+  constructor({ rng = Math.random } = {}) { this.rng = rng; this.fourChance = SPAWN_FOUR_CHANCE; this.nextId = 1; this.reset(); }
 
   reset() {
     this.cells = Array.from({ length: SIZE }, () => Array(SIZE).fill(null));
@@ -29,7 +29,7 @@ export class FuseGame {
   spawn(forceV = null) {
     const e = this.empty(); if (!e.length) return null;
     const { r, c } = e[Math.floor(this.rng() * e.length)];
-    const v = forceV || (this.rng() < SPAWN_FOUR_CHANCE ? 4 : 2);
+    const v = forceV || (this.rng() < this.fourChance ? 4 : 2);
     const t = { id: this.nextId++, v, r, c };
     this.cells[r][c] = t; this.maxTile = Math.max(this.maxTile, v);
     return t;

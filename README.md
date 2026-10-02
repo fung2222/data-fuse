@@ -13,6 +13,13 @@
 - 熔出 128、256、512… 會進入新**區域**，城市換色，仲會送你一次復原。
 - **復原 UNDO**：每局有 2 次免費，最多倒返 3 步。用完可以補充（網頁版免費；App 版用自願觀看嘅獎勵廣告）。
 - 冇得郁就「系統飽和」，可以倒帶 3 步繼續，或者再嚟一鋪。
+- **無盡模式**：冇「過關」終點。每次熔出新嘅倍數（128、256 … 131072 之後繼續 262144、524288…）都係新區域，永遠有下一個目標。2048 之後新方塊出 4 嘅機會每區 +1%（上限 20%），難度慢慢加但一直玩得落去。最強核心同最遠區域會記錄為無盡紀錄。
+
+## 語言 Language
+遊戲支援**繁體中文（香港）**同 **English**，喺主畫面或暫停畫面撳「EN／中」切換，會記住你嘅選擇（`localStorage cyber.lang`，所有 CYBER 遊戲共用）。網址加 `?lang=en` / `?lang=zh` 亦可。
+
+## English
+**DATA FUSE** is a relaxing cyberpunk 3D merge puzzle. Swipe anywhere (or use the arrow keys) to slide every glowing data cube; two equal cubes fuse into double. No timer — take your time. **Endless mode:** there is no "you win" screen — every new power of two from 128 upward opens a new district forever (beyond 131072 the zones keep coming), each with a colour shift and an undo bonus; past 2048 the 4-spawn chance creeps up 1 % per zone (capped at 20 %). Best core and best zone are saved. Undo up to 3 steps; rewind 3 steps on game over. Bilingual (Traditional Chinese / English) with an in-game toggle.
 
 ## 操作 Controls
 | 動作 Action | 手機 Touch | 鍵盤 Keyboard |
@@ -24,10 +31,10 @@
 | 新一局 New game | ⟳ | R |
 
 ## 網址參數 URL flags
-`?demo=1` AI 自動玩 · `?seed=123` 固定隨機種子 · `?fps=1` 顯示 FPS · `?quality=low|med|high` · `?adsim=1` 模擬廣告流程 · `?reset=1` 清除本機紀錄 · `?mute=1`
+`?demo=1` AI 自動玩 · `?lang=en|zh` · `?seed=123` 固定隨機種子 · `?fps=1` 顯示 FPS · `?quality=low|med|high` · `?adsim=1` 模擬廣告流程 · `?reset=1` 清除本機紀錄 · `?mute=1`
 
 ## 技術 Tech
-- Three.js r169 + [cyber-kit](https://github.com/fung2222/cyber-kit) v0.1.0（`vendor/cyber-kit/`），純 ES modules，冇 build step。
+- Three.js r169 + [cyber-kit](https://github.com/fung2222/cyber-kit) v0.2.1（`vendor/cyber-kit/`），純 ES modules，冇 build step。
 - 所有資源打包喺 repo 入面，可以離線運行（適合包成 Android App）。
 - 遊戲邏輯 `js/logic.js` 完全獨立於畫面，有單元測試。
 

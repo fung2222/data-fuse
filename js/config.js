@@ -12,6 +12,12 @@ export const UNDO_REWARD = 3;          // charges granted by one rewarded ad (we
 
 // Milestones: reaching each tile value the first time in a run = new zone (colour theme + banner).
 export const MILESTONES = [128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072];
+// Endless: zones are procedural — every doubling from 128 upward is a new zone forever (the authored list above ends at 131072).
+export const zoneForTile = (v) => v >= 128 ? Math.round(Math.log2(v)) - 5 : 1;
+export const nextMilestone = (v) => Math.max(128, 2 ** (Math.round(Math.log2(Math.max(2, v))) + 1));
+export const prevMilestone = (v) => nextMilestone(v) / 2 >= 128 ? nextMilestone(v) / 2 : 2;
+// Endless difficulty: beyond 2048 (zone 6) the 4-spawn chance creeps up 1 %/zone, capped at 20 %.
+export const fourChanceFor = (zone) => Math.min(0.2, SPAWN_FOUR_CHANCE + Math.max(0, zone - 6) * 0.01);
 
 // Animation timings (seconds)
 export const T_SLIDE = 0.11;

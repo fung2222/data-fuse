@@ -23,7 +23,9 @@ Swipe anywhere (one direction per finger-down, 22 px threshold) · arrows/WASD �
 | `SIZE` | 4 | board size |
 | `SPAWN_FOUR_CHANCE` | 0.1 | chance a spawn is a 4 |
 | `UNDO_DEPTH` / `UNDO_FREE` / `UNDO_REWARD` | 3 / 2 / 3 | history depth, free charges per run, charges per rewarded |
-| `MILESTONES` | 128 … 131072 | zone thresholds |
+| `MILESTONES` | 128 … 131072 | authored zone thresholds (kept for reference/tests) |
+| `zoneForTile(v)` / `nextMilestone(v)` | log2(v) − 5 / next power of two ≥ 128 | **endless**: procedural zones forever (262144 = zone 13 …) |
+| `fourChanceFor(zone)` | 0.1 + 1 %/zone beyond zone 6, cap 0.2 | endless difficulty curve (applied in `updateHUD`) |
 | `T_SLIDE` / `T_POP` / `T_SPAWN` | 0.11 / 0.24 / 0.18 s | animation timings |
 | `AI_DEMO_INTERVAL` / `AI_ATTRACT_INTERVAL` / `AI_DEPTH` | 0.26 / 0.62 s / 2 | autopilot pacing and expectimax depth |
 | `CELL` / `TILE` / `TILE_H` / `BOARD_Y` | 1.25 / 1.06 / 0.5 / 4.2 | 3D layout |
@@ -31,6 +33,12 @@ Swipe anywhere (one direction per finger-down, 22 px threshold) · arrows/WASD �
 | `TIER_COLORS` | per log2 tier | tile colours (2048 = white-gold) |
 
 Camera framing lives in `frameCamera()` in `js/main.js` (portrait: board fills the width; landscape: centred; attract: orbit, board to the right of the hero panel on desktop).
+
+## 3b. Endless mode & i18n (v1.1)
+- No win state. Zones are procedural (`zoneForTile`), so a new district banner + theme shift + undo bonus arrives at every doubling with no ceiling; labels switch to `ENDLESS ZONE n` beyond 131072. Records: `bestTile` (best core) and derived best zone on the start screen.
+- Difficulty: `fourChanceFor` raises the 4-spawn chance slowly after 2048, capped at 20 %. Test hook: `__fuse.api.endlessTest()` fuses 131072+131072.
+- Strings: `js/strings.js` (cyber-kit v0.2.1 i18n, `{key: [zh-HK, en]}`); HTML uses `data-i18n*`; toggles `#btn-lang` (start) / `#btn-lang2` (pause); `?lang=en|zh`.
+- Natural ad breaks unchanged: game over (Retry/Menu). Never at a zone banner.
 
 ## 4. File map
 ```
@@ -55,9 +63,10 @@ python3 -m http.server 18940          # from the parent folder
 node tests/logic.test.mjs             # rules: slides, double merges, no chain merge, spawn, game over, snapshot
 node tests/ai.bench.mjs               # AI reaches 2048 (≈3–4 ms / move)
 python tests/smoke.py [url] [outdir]  # Playwright: 412×915 touch + 1280×800 — start, swipe, keys, undo, pause,
-                                      # game over, rewind, continue after reload, demo, zero console errors
+                                      # game over, rewind, continue after reload, demo, language toggle/persist,
+                                      # endless zone 13 (beyond 131072), zero console errors
 ```
-Last run 2026-10-02: logic ALL PASSED · smoke ALL PASSED (both viewports, zero console errors).
+Last run 2026-10-02 (v1.1): logic ALL PASSED (incl. endless zone/curve tests) · smoke ALL PASSED (both viewports, zero console errors).
 
 ## 6. Android / Capacitor packaging outline
 1. `npm init -y && npm i @capacitor/core @capacitor/cli @capacitor/android @capacitor/app @capacitor/haptics @capacitor-community/admob@^8` (Capacitor 8).
