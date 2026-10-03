@@ -34,7 +34,7 @@
 `?demo=1` AI 自動玩 · `?lang=en|zh` · `?seed=123` 固定隨機種子 · `?fps=1` 顯示 FPS · `?quality=low|med|high` · `?adsim=1` 模擬廣告流程 · `?reset=1` 清除本機紀錄 · `?mute=1`
 
 ## 技術 Tech
-- Three.js r169 + [cyber-kit](https://github.com/fung2222/cyber-kit) v0.2.1（`vendor/cyber-kit/`），純 ES modules，冇 build step。
+- Three.js r169 + [cyber-kit](https://github.com/fung2222/cyber-kit) v0.3.0（`vendor/cyber-kit/`），純 ES modules，冇 build step。
 - 所有資源打包喺 repo 入面，可以離線運行（適合包成 Android App）。
 - 遊戲邏輯 `js/logic.js` 完全獨立於畫面，有單元測試。
 

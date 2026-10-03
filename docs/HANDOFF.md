@@ -88,3 +88,7 @@ Also needed for Play: privacy options entry (`ads.privacyOptionsRequired` → bu
 - Headless SwiftShader runs at ~3 FPS so screenshots show some motion blur in aberration; real phones run 60 FPS (auto-quality drops pixel ratio if needed).
 - No privacy-options button yet (only needed in the native build — add when packaging).
 - Possible polish: haptics toggle in a settings panel; colour-blind friendly tile glyph mode; daily seed challenge.
+
+## Audio loudness + glow (cyber-kit v0.3.0, 2026-10-03)
+- Audio: kit loudness model (music ≈ −20 LUFS integrated, median SFX ≈ music level). This game: music 'chill', sfxTrimDb 7.5 in `js/audio.js`. Re-measure after changing sounds: `python3 ../cyber-kit/tests/loudness.py http://127.0.0.1:18940 <dir>:<AudioClass> --kit /cyber-kit` (see kit docs/API.md "Loudness"). Keep music −20 ± 1 LUFS and SFX/BGM 0 ± 2 dB.
+- Glow: `createStage` values are the HIGH look; default is LOW (crisp). Shared pref `localStorage cyber.glow`, `?glow=low|high`. Pause screen has a GLOW: LOW/HIGH button (`ui.glowToggle(stage)`).

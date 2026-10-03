@@ -24,6 +24,7 @@ let stage;
 try {
   stage = createStage({ canvas: $('scene'), bloom: 0.9, bloomRadius: 0.5, bloomThreshold: 0.78, fov: 46, exposure: 1.05, onFatal: (m) => ui.fatal(m) });
 } catch (e) { throw e; }
+ui.glowToggle(stage);   // cyber-kit v0.3.0: GLOW LOW/HIGH button in the pause screen (shared preference, LOW = crisp default)
 const { scene, camera } = stage;
 
 const theme = new ThemeController();

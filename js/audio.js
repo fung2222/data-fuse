@@ -2,7 +2,7 @@
 import { SynthAudio, mtof } from 'cyber-kit/audio/synth.js';
 
 export class FuseAudio extends SynthAudio {
-  constructor(store) { super({ store, music: 'chill' }); }
+  constructor(store) { super({ store, music: 'chill', sfxTrimDb: 7.5 }); }
   slide() { this.noiseHit({ dur: 0.09, vol: 0.035, type: 'bandpass', f: 700, f2: 2400, q: 1.4, a: 0.02 }); }
   /** tier = log2(value); chain = merge index within this move */
   merge(tier, chain = 0) {
