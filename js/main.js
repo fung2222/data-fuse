@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 import {
   i18n, t, themeLabel, flags, createStore, createStage, ThemeController, themeFor, U, Particles, Shockwaves, FxState, NeonCity,
-  createInput, CyberUI, Platform, createAds,
+  createInput, CyberUI, Platform, createAds, readHub, returnToHub, shouldShowArcadeMenu
 } from 'cyber-kit';
 import {
   GAME_ID, SIZE, UNDO_DEPTH, UNDO_FREE, UNDO_REWARD, MILESTONES, AI_DEMO_INTERVAL, AI_ATTRACT_INTERVAL, AI_DEPTH,
@@ -287,6 +287,10 @@ createInput({
 
 function toggleMute() { audio.init(); const m = audio.toggleMute(); ui.setMuted(m); }
 ui.on('btn-start', () => { audio.init(); beginRun(false); });
+const __hub = readHub();
+if (shouldShowArcadeMenu(__hub)) { const b = document.getElementById('btn-arcade-menu'); if (b) b.classList.remove('hidden'); }
+ui.on('btn-arcade-menu', () => { try { audio.back(); } catch {} returnToHub({ gameId: 'data-fuse', openStore: false }); });
+
 ui.on('btn-continue', () => { audio.init(); beginRun(true); });
 ui.on('btn-resume', resume);
 ui.on('btn-quit', toMenu);

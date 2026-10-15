@@ -43,3 +43,5 @@
 @media (max-height: 560px) and (min-width: 761px) {
   .controls { display: none; }
 }
+
+/* hub return */ #btn-arcade-menu { margin-top: 10px; animation: none; }
