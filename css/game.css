@@ -45,3 +45,44 @@
 }
 
 /* hub return */ #btn-arcade-menu { margin-top: 0; animation: none; }
+
+/* v1.2 polish + twists */
+.mod-chip {
+  margin: 6px auto 0; padding: 5px 12px; width: fit-content; max-width: 100%;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  border: 1px solid color-mix(in srgb, var(--c1) 55%, transparent);
+  background: rgba(8,4,24,.55); clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+.mod-chip b { font-family: var(--font-zh); font-size: 13px; letter-spacing: 3px; color: var(--c3); text-shadow: 0 0 8px var(--c3); }
+.mod-chip small { font-family: 'Orbitron', sans-serif; font-size: 8px; letter-spacing: 2px; color: color-mix(in srgb, var(--c1) 80%, white); opacity: .85; max-width: 260px; text-align: center; }
+.mod-chip.hidden { display: none; }
+.mod-chip.drift { border-color: color-mix(in srgb, #ff2bd6 70%, transparent); }
+.mod-chip.lock { border-color: color-mix(in srgb, #ffe14a 70%, transparent); }
+.mod-chip.surge { border-color: color-mix(in srgb, #3bff6b 70%, transparent); }
+.mod-chip.echo { border-color: color-mix(in srgb, #4dfcff 70%, transparent); }
+.combo-line { margin-top: 4px; font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 2px; color: var(--c3); text-shadow: 0 0 8px var(--c3); text-align: center; }
+.combo-line.hidden { display: none; }
+.combo-line.hot b { color: #fff; font-size: 14px; }
+.popup.combo-toast { font-size: 16px; color: var(--c3); text-shadow: 0 0 12px var(--c3); }
+.popup.multi { font-size: 22px; }
+.popup.pulse { font-size: 24px; color: #ffe14a; }
+.popup.legendary { font-size: 32px; }
+#btn-pulse { position: relative; overflow: hidden; }
+#btn-pulse .pulse-meter { position: absolute; left: 4px; right: 4px; bottom: 3px; height: 3px; background: rgba(255,255,255,.12); border-radius: 2px; overflow: hidden; pointer-events: none; }
+#btn-pulse .pulse-meter i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--c1), var(--c3)); box-shadow: 0 0 6px var(--c3); }
+#btn-pulse.arming { filter: brightness(1.25); box-shadow: 0 0 14px var(--c3); }
+#btn-pulse svg { fill: none; stroke: var(--c1); }
+#btn-hint.off svg { opacity: .35; filter: none; }
+#btn-hint svg { fill: none; stroke: var(--c1); }
+.hint-chevron {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  pointer-events: none; font-family: 'Orbitron', sans-serif; font-size: 28px; letter-spacing: 4px;
+  color: color-mix(in srgb, var(--c3) 80%, white); text-shadow: 0 0 16px var(--c3); opacity: 0;
+  transition: opacity .15s;
+}
+.hint-chevron.on { opacity: .85; }
+@media (max-width: 760px) {
+  .mod-chip { margin-top: 4px; padding: 4px 10px; }
+  .mod-chip b { font-size: 11px; }
+  .mod-chip small { font-size: 7px; max-width: 200px; }
+}

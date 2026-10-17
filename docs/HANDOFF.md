@@ -1,6 +1,6 @@
 # DATA FUSE 數據熔合 — Handoff
 
-Status: **web build done (v1.0)** · live https://fung2222.github.io/data-fuse/ · not yet packaged for Android.
+Status: **web build v1.2 — polish + ZONE MODS / PULSE FUSE / HINT** · live https://fung2222.github.io/data-fuse/ · not yet packaged for Android.
 Part of CYBER ARCADE (see `fung2222/cyber-arcade/docs/ARCADE-HANDOFF.md` for the series rules: never port code from `sono`, AdMob policy, naming).
 
 ## 1. Design
@@ -49,9 +49,10 @@ js/logic.js         FuseGame: pure rules (ids, move records, snapshot/restore, s
 js/ai.js            expectimax autoplayer (demo / attract)
 js/board.js         BoardView: slab, socket shader, glass tile pool, slide/merge/spawn animation, tilt spring
 js/labels.js        number textures (Orbitron, cached canvases)
-js/audio.js         FuseAudio extends cyber-kit SynthAudio ('chill' music, tiered chimes)
+js/audio.js         FuseAudio (chill + combo/pulse/mod/ambient)
+js/polish.js        ComboAura, MergeHint, slideTrail
 js/main.js          states (attract/playing/paused/over), input, undo, milestones, effects, camera, saves, ads hooks
-vendor/cyber-kit/   cyber-kit v0.1.0 (includes three r169) — do not edit here; update from the kit repo
+vendor/cyber-kit/   cyber-kit v0.3.8 (includes three r169) — do not edit here; update from the kit repo
 tests/              logic.test.mjs, ai.bench.mjs, smoke.py
 privacy.html        zh-HK + EN privacy policy (localStorage only; future AdMob)
 ```
@@ -92,3 +93,34 @@ Also needed for Play: privacy options entry (`ads.privacyOptionsRequired` → bu
 ## Audio loudness + glow (cyber-kit v0.3.0, 2026-10-03)
 - Audio: kit loudness model (music ≈ −20 LUFS integrated, median SFX ≈ music level). This game: music 'chill', sfxTrimDb 7.5 in `js/audio.js`. Re-measure after changing sounds: `python3 ../cyber-kit/tests/loudness.py http://127.0.0.1:18940 <dir>:<AudioClass> --kit /cyber-kit` (see kit docs/API.md "Loudness"). Keep music −20 ± 1 LUFS and SFX/BGM 0 ± 2 dB.
 - Glow: `createStage` values are the HIGH look; default is LOW (crisp). Shared pref `localStorage cyber.glow`, `?glow=low|high`. Pause screen has a GLOW: LOW/HIGH button (`ui.glowToggle(stage)`).
+
+
+## 9. Feel polish + gameplay twists (v1.2, 2026-10-17)
+Enhancement pass parallel to neon-recall / mini-pack. **No timer, no lives, no new fail state.** Keep endless + hub Arcade Menu.
+
+### Zone modifiers (from zone ≥3, cycles)
+| Mod | Id | Effect |
+|---|---|---|
+| 數據漂移 DATA DRIFT | `drift` | After a merge swipe, two non-max tiles soft-swap |
+| 鎖定核心 LOCK CORE | `lock` | Highest tile pinned for 1 swipe |
+| 分數超頻 SCORE SURGE | `surge` | Merge score ×1.5; +1 undo at zone open |
+| 回聲生成 ECHO SPAWN | `echo` | Next spawn cell heats/telegraphs before materialising |
+
+Schedule: `modifierFor(zone)` in `js/config.js`. HUD mod chip + zone banner.
+
+### Pulse Fuse (risk-reward)
+- **Hold** swipe (~0.4 s) / **Pulse button** / **X** = PULSE: only adjacent equals fuse in place (no full-board slide). Costs **1 undo**.
+- Meter on the Pulse button.
+
+### Merge hint (QoL, default on)
+After a dead swipe, soft chevron suggests a legal merge axis. Toggle **H** / HUD hint button; persist `localStorage cyber.data-fuse.echoHint` (`0` = off).
+
+### VFX / SFX polish
+- Merge tiers: `normal` / `multi` / `big` / `pulse` / `legendary`
+- Combo ×N across consecutive merge moves; aura + toast; ambient bed
+- Slide trails; PERFECT FUSE toast when every moving tile merged
+
+### How-to
+Home menu **玩法說明 / HOW TO PLAY** via cyber-kit `ui.mountHowto` (v0.3.8).
+
+Shots: `/workspace/shots/fuse-polish/`. Author commits as 嘉豐.

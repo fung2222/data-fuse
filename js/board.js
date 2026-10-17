@@ -290,4 +290,33 @@ export class BoardView {
   set danger(v) { this.sockU.uDanger.value = v; }
   /** dim all tiles (game over) 0..1 */
   setDim(v) { for (const tv of this.pool) if (tv.active) tv.mat.uniforms.uDim.value = v; }
+
+  /** Highlight locked core (zone mod). */
+  setLocked(id) {
+    for (const tv of this.pool) if (tv.active) {
+      const on = id != null && tv.id === id;
+      tv.mat.uniforms.uGlow.value = on ? Math.max(tv.mat.uniforms.uGlow.value, 0.85) : tv.mat.uniforms.uGlow.value;
+      if (on) this.anims.push({ tv, kind: 'pop', t: 0.05, dur: 0.3 });
+    }
+  }
+
+  /** Animate two tiles swapping slots (drift mod). */
+  swapTiles(idA, idB, ar, ac, br, bc) {
+    const a = this.get(idA), b = this.get(idB);
+    if (!a || !b) { return; }
+    const fromA = a.group.position.clone(), fromB = b.group.position.clone();
+    const toA = cellPos(ar, ac); toA.y = BOARD_Y + TILE_H / 2;
+    const toB = cellPos(br, bc); toB.y = BOARD_Y + TILE_H / 2;
+    this.anims.push({ tv: a, kind: 'slide', t: 0, dur: T_SLIDE * 1.2, from: fromA, to: toA, consumed: false });
+    this.anims.push({ tv: b, kind: 'slide', t: 0, dur: T_SLIDE * 1.2, from: fromB, to: toB, consumed: false });
+  }
+
+  /** Soft direction wash on socket (hint). dir = 'up'|'down'|'left'|'right'|null, strength 0..1 */
+  setHint(dir, strength = 0) {
+    // encode into danger-ish channel lightly via heat on edge cells
+    const heat = this.sockU.uHeat.value;
+    if (!dir || strength <= 0) return;
+    const edge = { up: [[0,0],[0,1],[0,2],[0,3]], down: [[3,0],[3,1],[3,2],[3,3]], left: [[0,0],[1,0],[2,0],[3,0]], right: [[0,3],[1,3],[2,3],[3,3]] }[dir] || [];
+    for (const [r, c] of edge) heat[r * SIZE + c] = Math.max(heat[r * SIZE + c], 0.35 * strength);
+  }
 }

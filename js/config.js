@@ -2,7 +2,7 @@
 export const GAME_ID = 'data-fuse';
 
 export const SIZE = 4;                 // board is SIZE x SIZE
-export const SPAWN_FOUR_CHANCE = 0.1;  // chance a new tile is a 4 instead of 2
+export const SPAWN_FOUR_CHANCE = 0.1;  // chance a new tile is a 4 instead of a 2
 export const START_TILES = 2;
 
 // Undo: last N board states are kept; each undo costs one charge.
@@ -12,17 +12,29 @@ export const UNDO_REWARD = 3;          // charges granted by one rewarded ad (we
 
 // Milestones: reaching each tile value the first time in a run = new zone (colour theme + banner).
 export const MILESTONES = [128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072];
-// Endless: zones are procedural — every doubling from 128 upward is a new zone forever (the authored list above ends at 131072).
+// Endless: zones are procedural — every doubling from 128 upward is a new zone forever.
 export const zoneForTile = (v) => v >= 128 ? Math.round(Math.log2(v)) - 5 : 1;
 export const nextMilestone = (v) => Math.max(128, 2 ** (Math.round(Math.log2(Math.max(2, v))) + 1));
 export const prevMilestone = (v) => nextMilestone(v) / 2 >= 128 ? nextMilestone(v) / 2 : 2;
 // Endless difficulty: beyond 2048 (zone 6) the 4-spawn chance creeps up 1 %/zone, capped at 20 %.
 export const fourChanceFor = (zone) => Math.min(0.2, SPAWN_FOUR_CHANCE + Math.max(0, zone - 6) * 0.01);
 
+// Zone modifiers (from MOD_FROM): cycle drift → lock → surge → echo. Distinct endless DNA, no timer.
+export const MOD_FROM = 3;
+export const MOD_CYCLE = ['drift', 'lock', 'surge', 'echo'];
+export const modifierFor = (zone) => (zone < MOD_FROM ? null : MOD_CYCLE[(zone - MOD_FROM) % MOD_CYCLE.length]);
+export const SURGE_MULT = 1.5;         // merge-score multiplier on surge zones
+export const SURGE_UNDO_BONUS = 1;     // +undo when entering a surge zone (capped by UNDO_FREE in main)
+export const LOCK_SWIPES = 1;          // highest tile pinned for this many swipes
+export const PULSE_HOLD_MS = 400;      // hold swipe/arrow this long → PULSE FUSE
+export const COMBO_CAP = 8;
+export const ECHO_FADE = 0.9;          // hint glow after a dead swipe (s)
+
 // Animation timings (seconds)
 export const T_SLIDE = 0.11;
 export const T_POP = 0.24;
 export const T_SPAWN = 0.18;
+export const T_ECHO_SPAWN = 0.55;      // telegraph delay on echo-mod zones before spawn materialises
 
 // AI pacing (seconds per move)
 export const AI_DEMO_INTERVAL = 0.26;     // ?demo=1
@@ -30,18 +42,17 @@ export const AI_ATTRACT_INTERVAL = 0.62;  // background play behind the start sc
 export const AI_DEPTH = 2;
 
 // 3D layout (world units)
-export const CELL = 1.25;              // centre-to-centre spacing
-export const TILE = 1.06;              // tile footprint
-export const TILE_H = 0.5;             // tile height
-export const BOARD_Y = 4.2;            // board top surface height above the street
+export const CELL = 1.25;
+export const TILE = 1.06;
+export const TILE_H = 0.5;
+export const BOARD_Y = 4.2;
 export const BOARD_HALF = SIZE * CELL / 2 + 0.32;
 
 // Ads (web build: no ads; Android build: AdMob via cyber-kit createAds)
 export const ADS = {
-  interstitialCooldownSec: 240,   // at most one interstitial every 4 minutes
-  breaksBetweenInterstitials: 3,  // and only every 3rd game over
-  graceSec: 180,                  // never in the first 3 minutes after launch
-  // Fill in real AdMob unit ids before the Play release (leave unset = Google test ads)
+  interstitialCooldownSec: 240,
+  breaksBetweenInterstitials: 3,
+  graceSec: 180,
   units: { android: { /* interstitial: 'ca-app-pub-XXXX/YYYY', rewarded: 'ca-app-pub-XXXX/ZZZZ' */ } },
 };
 

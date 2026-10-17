@@ -8,8 +8,8 @@
 <meta name="description" content="數據熔合 DATA FUSE — 3D 賽博朋克數字合併解壓遊戲。滑動合併發光數據方塊，冇時間限制。">
 <title data-i18n="doc.title">數據熔合 DATA FUSE · 賽博朋克 3D 合併解壓</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 fill=%22%2305010f%22/%3E%3Crect x=%224%22 y=%224%22 width=%2211%22 height=%2211%22 rx=%222%22 fill=%22none%22 stroke=%22%2300e5ff%22 stroke-width=%222%22/%3E%3Crect x=%2217%22 y=%2217%22 width=%2211%22 height=%2211%22 rx=%222%22 fill=%22none%22 stroke=%22%23ff2bd6%22 stroke-width=%222%22/%3E%3Crect x=%2217%22 y=%224%22 width=%2211%22 height=%2211%22 rx=%222%22 fill=%22%23ffc22b%22/%3E%3C/svg%3E">
-<link rel="stylesheet" href="./vendor/cyber-kit/ui/hud.css?v=0.3.7">
-<link rel="stylesheet" href="./css/game.css?v=0.3.7">
+<link rel="stylesheet" href="./vendor/cyber-kit/ui/hud.css?v=0.3.8">
+<link rel="stylesheet" href="./css/game.css?v=0.3.8">
 <script type="importmap">
 {
   "imports": {
@@ -41,6 +41,8 @@
       <div class="lp-bar"><div class="lp-fill" id="hud-progress"></div></div>
     </div>
     <div class="zone-name" id="hud-zone-name">霓虹九龍</div>
+    <div class="mod-chip hidden" id="hud-mod"><b id="hud-mod-name"></b><small id="hud-mod-sub"></small></div>
+    <div class="combo-line hidden" id="hud-combo-wrap"><span data-i18n="combo">連熔</span> <b id="hud-combo">×1</b></div>
   </div>
   <div class="df-bar">
     <button id="btn-undo" class="df-undo" data-i18n-attr="title:undoTip,aria-label:undo">
@@ -49,6 +51,13 @@
       <span class="df-badge" id="undo-badge">2</span>
     </button>
     <div class="hud-buttons">
+      <button id="btn-pulse" class="icon-btn" data-i18n-attr="title:pulseTip,aria-label:pulseTip">
+        <svg viewBox="0 0 24 24"><path d="M4 12h4l2-6 4 12 2-6h4" fill="none" stroke-width="2.2"/><circle cx="12" cy="12" r="9" fill="none" stroke-width="1.4" opacity=".45"/></svg>
+        <span class="pulse-meter"><i id="pulse-fill"></i></span>
+      </button>
+      <button id="btn-hint" class="icon-btn" data-i18n-attr="title:hintTip,aria-label:hintTip">
+        <svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" fill="none" stroke-width="2"/><circle cx="12" cy="12" r="3.2" fill="none" stroke-width="2"/></svg>
+      </button>
       <button id="btn-new" class="icon-btn" data-i18n-attr="title:newTip,aria-label:newTip">
         <svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7" fill="none" stroke-width="2.2"/><path d="M20 4v5h-5" fill="none" stroke-width="2.2"/></svg>
       </button>
@@ -61,6 +70,7 @@
       </button>
     </div>
   </div>
+  <div id="hint-chevron" class="hint-chevron" aria-hidden="true"></div>
   <div id="demo-tag" class="demo-tag hidden" data-i18n="kit.demo"></div>
   <div id="fps" class="fps hidden">-- FPS</div>
 </div>
