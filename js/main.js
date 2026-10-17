@@ -517,6 +517,7 @@ ui.on('btn-menu', overToMenu);
 ui.on('btn-revive', revive);
 
 ui.mountHowto({
+  privacyUrl: './privacy.html',
   onOpen: () => { try { audio.click(); } catch (_) {} },
   getContent: () => ({
     kicker: 'DATA FUSE',
@@ -527,6 +528,11 @@ ui.mountHowto({
     ],
   }),
 });
+ui.mountSettings({
+  audio, stage,
+  onOpen: () => { try { audio.click(); } catch (_) {} },
+});
+
 
 Platform.onBack(() => {
   if (ui.closeModal()) return true;
