@@ -3,7 +3,8 @@
 import * as THREE from 'three';
 import {
   i18n, t, themeLabel, flags, createStore, createStage, ThemeController, themeFor, U, Particles, Shockwaves, FxState, NeonCity,
-  createInput, CyberUI, Platform, createAds, readHub, returnToHub, shouldShowArcadeMenu
+  createInput, CyberUI, Platform, createAds, readHub, returnToHub, shouldShowArcadeMenu,
+  ViewInput, defaultView, clampView, dampView
 } from 'cyber-kit';
 import {
   GAME_ID, SIZE, UNDO_DEPTH, UNDO_FREE, UNDO_REWARD, MILESTONES, AI_DEMO_INTERVAL, AI_ATTRACT_INTERVAL, AI_DEPTH,
@@ -149,6 +150,7 @@ function prefillAttract() {
   for (let i = 0; i < 70 && !S.attract.over; i++) { const d = aiChoose(S.attract.values(), 1); if (!d || !S.attract.move(d)) break; }
 }
 function showAttract() {
+  resetPlayView(true);
   prefillAttract(); board.sync(S.attract, true); board.setDim(1);
   S.zone = 1; S.mod = null; theme.set(1); S.game.setSurge(false); S.game.clearLock();
   paintModChip();
@@ -156,6 +158,7 @@ function showAttract() {
 }
 
 function beginRun(resume) {
+  resetPlayView(true);
   audio.init(); audio.startMusic(); audio.unduckMusic(); audio.startAmbient();
   const s = resume ? loadRun() : null;
   if (s) {
@@ -545,12 +548,28 @@ Platform.onPause(() => { saveRun(); if (S.state === 'playing' && !S.demo) pause(
 
 const camPos = new THREE.Vector3(0, 20, 14), camLook = new THREE.Vector3(0, BOARD_Y, 0);
 const tmpP = new THREE.Vector3(), tmpL = new THREE.Vector3();
+const pView = defaultView(), pViewC = defaultView(), VIEW_EXT = [BOARD_HALF, BOARD_HALF];
+let viewPitch = 1.0;
+const inMatch = () => (S.state === 'playing' || S.state === 'paused') && !S.demo;
+const gesturesOn = () => inMatch() && !ui.modalOpen;
+function resetPlayView(instant = true) { Object.assign(pView, defaultView()); if (instant) Object.assign(pViewC, defaultView()); }
+new ViewInput($('scene'), {
+  enabled: gesturesOn,
+  zoom: (f) => { pView.zoom *= f; clampView(pView, viewPitch, VIEW_EXT); },
+  twist: (d) => { pView.az += d; clampView(pView, viewPitch, VIEW_EXT); },
+  pan: (x0, y0, x1, y1) => { const k = 0.01; pView.px += (x0 - x1) * k; pView.pz += (y0 - y1) * k; clampView(pView, viewPitch, VIEW_EXT); },
+  orbit: (dAz, dEl) => { pView.az += dAz; pView.el += dEl; clampView(pView, viewPitch, VIEW_EXT); },
+}, { oneFingerOrbit: false });
+
 function frameCamera(dt, now, instant = false) {
   const aspect = stage.width / stage.height, portrait = aspect < 0.9;
   const attract = S.state === 'attract';
+  const useView = inMatch();
+  if (!useView) resetPlayView(true);
   const vfov = portrait ? 50 : 42;
   camera.fov = vfov + fx.fovKick * 3; camera.updateProjectionMatrix();
-  const pitch = THREE.MathUtils.degToRad(attract ? (portrait ? 50 : 40) : (portrait ? 64 : 58));
+  let pitch = THREE.MathUtils.degToRad(attract ? (portrait ? 50 : 40) : (portrait ? 64 : 58));
+  viewPitch = pitch;
   const halfW = BOARD_HALF + 0.35;
   const tanV = Math.tan(THREE.MathUtils.degToRad(vfov / 2)), tanH = tanV * aspect;
   const usable = portrait ? 0.6 : 0.74;
@@ -561,6 +580,11 @@ function frameCamera(dt, now, instant = false) {
   if (attract) {
     yaw = Math.sin(now * 0.12) * 0.4; d *= portrait ? 1.1 : 1.3;
     if (!portrait) lx = -BOARD_HALF * 0.95; else lz = 2.2;
+  }
+  if (useView) {
+    clampView(pView, viewPitch, VIEW_EXT);
+    if (!instant) dampView(pViewC, pView, Math.max(dt, 1 / 120)); else Object.assign(pViewC, pView);
+    yaw += pViewC.az; pitch = viewPitch + pViewC.el; d *= pViewC.zoom; lx += pViewC.px; lz += pViewC.pz;
   }
   tmpL.set(lx, BOARD_Y, lz);
   tmpP.set(Math.sin(yaw) * Math.cos(pitch) * d, Math.sin(pitch) * d, Math.cos(yaw) * Math.cos(pitch) * d).add(tmpL);
