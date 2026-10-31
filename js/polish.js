@@ -21,10 +21,10 @@ export class ComboAura {
     if (this.power <= 0) { this.mesh.visible = false; return; }
     this.t += dt;
     const k = Math.min(1, this.t / 0.55);
-    const s = 1 + k * (0.9 + this.power * 0.35);
+    const s = 1 + k * (1.25 + this.power * 0.55);
     this.mesh.scale.setScalar(s);
     if (color) this.mat.color.copy(color);
-    this.mat.opacity = (1 - k) * (0.36 + this.power * 0.16);
+    this.mat.opacity = (1 - k) * (0.45 + this.power * 0.22);
     if (k >= 1) { this.power *= 0.35; this.t = 0; if (this.power < 0.15) { this.power = 0; this.mesh.visible = false; } }
   }
 }

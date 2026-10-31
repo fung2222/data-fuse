@@ -108,9 +108,17 @@ function updateHUD(bump = false) {
   const cw = $('hud-combo-wrap'), cb = $('hud-combo');
   if (cw && cb) {
     const show = g.combo >= 2 && S.state !== 'attract';
+    const prev = parseInt(cb.dataset.n || '0', 10) || 0;
     cw.classList.toggle('hidden', !show);
-    cw.classList.toggle('hot', g.combo >= 3);
+    cw.classList.toggle('hot', g.combo >= 3 && g.combo < 5);
+    cw.classList.toggle('blaze', g.combo >= 5);
     cb.textContent = '×' + Math.max(1, g.combo);
+    if (show && g.combo > prev) {
+      cw.classList.remove('punch'); void cw.offsetWidth; cw.classList.add('punch');
+      clearTimeout(cw._punchT);
+      cw._punchT = setTimeout(() => cw.classList.remove('punch'), 300);
+    }
+    cb.dataset.n = String(g.combo);
   }
   paintModChip();
   board.setLocked(g.lockLeft > 0 ? g.lockedId : null);
@@ -175,13 +183,20 @@ function beginRun(resume) {
   audio.confirm();
 }
 
-function comboToast(x, y, n) {
+function comboToast(x, y, n, scoreMult = 1) {
   const d = document.createElement('div');
-  d.className = 'popup combo-toast';
+  const tier = n >= 5 ? ' blaze' : n >= 3 ? ' hot' : '';
+  d.className = 'popup combo-toast' + tier;
   d.style.left = x + 'px'; d.style.top = y + 'px';
   d.textContent = t('comboText', { n });
+  if (scoreMult > 1) {
+    const s = document.createElement('span');
+    s.className = 'mult-pop';
+    s.textContent = '×' + scoreMult;
+    d.appendChild(s);
+  }
   (ui.el.popups || document.body).appendChild(d);
-  setTimeout(() => d.remove(), 1100);
+  setTimeout(() => d.remove(), 1150);
 }
 
 function doMove(d, game = S.game, live = true, { pulse = false } = {}) {
@@ -282,11 +297,31 @@ function onMerge(m, pos, chain, live, rec) {
   if (tier >= 4 || feel === 'pulse' || feel === 'multi') {
     const sp = stage.toScreen(pos.clone().setY(pos.y + 0.6));
     const cls = feel === 'legendary' ? 'legendary' : feel === 'pulse' ? 'pulse' : feel === 'multi' ? 'multi' : big ? 'big' : 'merge';
-    ui.popup(sp.x, sp.y, '+' + m.v, rec?.scoreMult > 1 ? '×' + rec.scoreMult : '', cls);
+    ui.popup(sp.x, sp.y, '+' + m.v, '', cls);
+    if (rec?.scoreMult > 1) {
+      const pops = ui.el.popups;
+      const last = pops && pops.lastElementChild;
+      if (last && last.classList.contains('popup')) {
+        const s = document.createElement('span');
+        s.className = 'mult-pop';
+        s.textContent = '×' + rec.scoreMult;
+        last.appendChild(s);
+      }
+    }
     if (rec?.combo >= 2 && chain === 0) {
-      comboAura.pulse(pos.x, pos.z, rec.combo >= 4 ? 1.4 : 1);
-      comboToast(sp.x, sp.y - 36, rec.combo);
-      audio.combo(rec.combo);
+      const c = rec.combo;
+      const power = c >= 6 ? 2.1 : c >= 4 ? 1.7 : 1.35;
+      comboAura.pulse(pos.x, pos.z, power);
+      comboToast(sp.x, sp.y - 48, c, rec.scoreMult || 1);
+      audio.combo(c);
+      // Mobile-safe chromatic pulse + light shake (bible cyan/magenta via aberr bloom)
+      const trauma = Math.min(0.42, 0.1 + c * 0.035);
+      const aberr = Math.min(0.95, 0.35 + c * 0.08);
+      fx.kick({ trauma, aberr, glitch: c >= 5 ? 0.22 : 0.08 });
+      Platform.haptic(c >= 5 ? 'medium' : 'light');
+    } else if (rec?.combo >= 2 && chain > 0) {
+      // Subsequent chain hits in the same swipe: soft pulse, no toast spam
+      fx.kick({ trauma: Math.min(0.22, 0.05 + chain * 0.03), aberr: Math.min(0.55, 0.2 + chain * 0.06) });
     }
   }
   // PERFECT FUSE: every moving tile was consumed into a merge
