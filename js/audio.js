@@ -1,5 +1,5 @@
-// DATA FUSE sound set (all synthesised). Cyber neon arcade: electronic/synth SFX + driving pulse BGM.
-// v1.2.3: SFX → saw/square/noise + filter sweeps (keep shallow→deep chain); BGM chill→drive synthwave.
+// DATA FUSE sound set (all synthesised). Cyber neon arcade: clean fuse SFX + driving pulse BGM.
+// v1.2.3 audio pass: one rounded fuse body + glass ping; softer hats/ambient for phone speakers.
 import { SynthAudio, mtof } from 'cyber-kit/audio/synth.js';
 
 /** Slight cents jitter so stacked layers don't phase-lock into one flat tone. Mobile-safe (no AudioWorklet). */
@@ -16,11 +16,11 @@ const FUSE_DRIVE = {
   roots: [45, 41, 48, 43],
   chords: [[0, 3, 7], [0, 4, 7], [0, 3, 7], [0, 5, 7]],
   kick: 'four',
-  hats: true,
+  hats: 'soft',
   bass: 'eighths',
   arp: true,
-  pad: 0.02,
-  gain: 0.4,
+  pad: 0.015,
+  gain: 0.42,
   trimDb: 4.2,
 };
 
@@ -28,6 +28,14 @@ export class FuseAudio extends SynthAudio {
   constructor(store) {
     super({ store, music: FUSE_DRIVE, sfxTrimDb: 7.5 });
     this._amb = null;
+  }
+
+  /** Keep the top end below phone-speaker hiss while the drive is playing. */
+  unduckMusic() {
+    if (!this.ctx || !this.musicFilter) return;
+    const t = this.ctx.currentTime;
+    this.musicFilter.frequency.cancelScheduledValues(t);
+    this.musicFilter.frequency.setTargetAtTime(14000, t, 0.2);
   }
 
   slide() {
@@ -38,170 +46,33 @@ export class FuseAudio extends SynthAudio {
 
   /**
    * tier = log2(value); chain = merge index within this move; feel = 'normal'|'multi'|'big'|'legendary'|'pulse'
-   * Chain hits rise shallow→deep: early hits bright/high, later hits drop pitch + grow body/volume (no clipping).
-   * v1.2.3: electronic carriers (saw/square), filter sweeps, noise grit — still short/punchy, not muddy.
+   * Chain hits rise shallow→deep; one rounded body carries the pitch, one ping gives identity.
+   * Keep this sparse: phone speakers turn a detuned saw/noise stack into mud.
    */
   merge(tier, chain = 0, feel = 'normal') {
     if (!this.ctx) return;
-    const t = chain * 0.045;
+    const t = chain * 0.04;
+    const n = Math.max(1, tier) - 1;
+    const depth = Math.min(chain, 5);
     const scale = [0, 2, 4, 7, 9];
-    const n = tier - 1;
-    const depth = Math.min(chain, 7);
-    const m = 70 + Math.floor(n / 5) * 12 + scale[n % 5] - depth * 4; // drop ~4 semitones per chain hit
-    const base = feel === 'legendary' || feel === 'pulse' ? 0.11 : feel === 'big' ? 0.1 : 0.09;
-    const vol = Math.min(0.15, base + depth * 0.008);
-    const carrier = STEP_TIMBRES[depth % STEP_TIMBRES.length];
-    const bright = STEP_TIMBRES[(depth + 3) % STEP_TIMBRES.length];
-    const lpOpen = 4200 - depth * 180; // early bright, later darker (filter body)
+    const m = 64 + Math.floor(n / 5) * 12 + scale[n % 5] - depth * 3;
+    const big = tier >= 7 || feel === 'big' || feel === 'legendary';
+    const pulse = feel === 'pulse';
+    const vol = (big ? 0.048 : 0.042) * (1 - depth * 0.04);
+    const body = 0.17 + depth * 0.02;
 
-    // Punchy carrier + detuned twin (chorusing) — electronic, not soft sine pad
-    this.osc({
-      type: carrier,
-      f: mtof(m),
-      t,
-      dur: 0.22 + depth * 0.025,
-      vol,
-      detune: det(14),
-      send: 0.28,
-      lp: lpOpen,
-      q: 3.5,
-    });
-    this.osc({
-      type: 'square',
-      f: mtof(m),
-      t,
-      dur: 0.14 + depth * 0.015,
-      vol: vol * 0.35,
-      detune: det(22),
-      send: 0.18,
-      lp: lpOpen * 0.85,
-    });
-
-    // Harmonic bite: octave / fifth / sparkle with independent detune + short noise grit
-    this.osc({
-      type: bright,
-      f: mtof(m + 12 - Math.min(depth, 4)),
-      t,
-      dur: 0.1 + depth * 0.012,
-      vol: Math.min(0.05, 0.028 + depth * 0.003),
-      detune: det(18),
-      send: 0.22,
-      lp: 5200 - depth * 150,
-    });
-    this.osc({
-      type: 'sawtooth',
-      f: mtof(m + 7),
-      t: t + 0.01,
-      dur: 0.09,
-      vol: Math.min(0.038, 0.02 + depth * 0.002),
-      detune: det(12),
-      send: 0.16,
-      lp: 3600,
-    });
-    // Micro FM-ish pitch sweep on a thin square (cyber zap)
-    this.osc({
-      type: 'square',
-      f: mtof(m + 19),
-      f2: mtof(m + 7 + (depth % 3)),
-      t: t + 0.015,
-      dur: 0.05,
-      vol: Math.min(0.03, 0.014 + depth * 0.0015),
-      lp: 2800 - depth * 80,
-      detune: det(10),
-    });
-    this.noiseHit({
-      t,
-      dur: 0.045 + depth * 0.006,
-      vol: Math.min(0.038, 0.018 + depth * 0.0025),
-      type: 'bandpass',
-      f: 1800 + depth * 120,
-      f2: 500 + depth * 40,
-      q: 1.4,
-      a: 0.003,
-    });
-
-    // Growing sub body = the "deep" thrill
-    if (depth >= 1) {
-      this.osc({
-        type: 'sine',
-        f: mtof(m - 12 - depth * 2),
-        t,
-        dur: 0.32 + depth * 0.035,
-        vol: Math.min(0.17, 0.065 + depth * 0.016),
-        detune: det(6),
-      });
-      this.osc({
-        type: 'sawtooth',
-        f: mtof(m - 12 - depth),
-        t,
-        dur: 0.16 + depth * 0.02,
-        vol: Math.min(0.05, 0.022 + depth * 0.004),
-        lp: 900 + depth * 80,
-        q: 4,
-      });
-    }
-    if (depth >= 3) {
-      this.osc({
-        type: 'sine',
-        f: mtof(Math.max(24, m - 24 - depth)),
-        t: t + 0.008,
-        dur: 0.42,
-        vol: Math.min(0.19, 0.095 + depth * 0.011),
-      });
-      this.noiseHit({
-        t,
-        dur: 0.16,
-        vol: Math.min(0.04, 0.018 + depth * 0.0035),
-        type: 'lowpass',
-        f: 2200,
-        f2: 280,
-        q: 0.9,
-        a: 0.008,
-      });
-    }
-    if (tier >= 7 || feel === 'big' || feel === 'legendary') {
-      this.osc({ type: 'sine', f: mtof(m - 24), t, dur: 0.4, vol: Math.min(0.19, 0.15 + depth * 0.007) });
-      this.osc({
-        type: 'sawtooth',
-        f: mtof(m),
-        f2: mtof(m - 7),
-        t,
-        dur: 0.18,
-        vol: 0.045,
-        lp: 2400,
-        q: 5,
-        send: 0.3,
-        detune: det(8),
-      });
-      this.noiseHit({ t, dur: 0.22, vol: 0.04, type: 'bandpass', f: 800, f2: 4500, q: 1.1, a: 0.008 });
-    }
-    if (feel === 'pulse') {
-      this.osc({
-        type: 'sawtooth',
-        f: mtof(m - 12),
-        f2: mtof(m),
-        t: t + 0.015,
-        dur: 0.16,
-        vol: 0.07,
-        lp: 2600,
-        q: 6,
-        detune: det(12),
-        send: 0.28,
-      });
-      this.noiseHit({ t: t + 0.01, dur: 0.08, vol: 0.035, type: 'highpass', f: 2500, f2: 7000, q: 1.2 });
-    }
-    if (feel === 'multi') {
-      this.osc({
-        type: 'square',
-        f: mtof(m + 7 - depth),
-        t: t + 0.04,
-        dur: 0.1,
-        vol: 0.038,
-        lp: 3800,
-        detune: det(14),
-        send: 0.25,
-      });
-    }
+    // 1) Rounded body: one sine fundamental with a short downward pitch.
+    this.osc({ type: 'sine', f: mtof(m - 12), f2: mtof(m - 14), t, dur: body, vol: vol * 0.95, a: 0.004, send: 0.10 });
+    // 2) Warm triangle partial — no detuned saw stack, so phone speakers stay clear.
+    this.osc({ type: 'triangle', f: mtof(m), f2: mtof(m - 2), t, dur: body * 0.8, vol: vol * 0.38, lp: 3000, q: 1.1, send: 0.16 });
+    // 3) One glass ping is the fuse identity; it cuts through the music without noise.
+    this.osc({ type: 'sine', f: mtof(m + 19), f2: mtof(m + 12), t: t + 0.006, dur: 0.11, vol: vol * 0.26, a: 0.002, send: 0.22 });
+    // 4) Very short click for definition; deliberately quiet.
+    this.noiseHit({ t, dur: 0.026, vol: 0.012, type: 'bandpass', f: 2600, f2: 1300, q: 1.2, a: 0.001 });
+    // 5) One low lift for big / pulse, not a second detuned stack.
+    if (big || pulse) this.osc({ type: 'sine', f: mtof(Math.max(28, m - 24)), t, dur: 0.34, vol: big ? 0.06 : 0.05, a: 0.006, send: 0.08 });
+    if (pulse) this.osc({ type: 'square', f: mtof(m + 7), f2: mtof(m + 12), t: t + 0.01, dur: 0.06, vol: 0.022, lp: 2200, q: 2, send: 0.12 });
+    if (feel === 'multi') this.osc({ type: 'sine', f: mtof(m + 12), t: t + 0.03, dur: 0.08, vol: 0.025, send: 0.2 });
   }
 
   /**
@@ -355,7 +226,7 @@ export class FuseAudio extends SynthAudio {
     bp.connect(g);
     g.connect(this.sfx);
     src.start();
-    g.gain.setTargetAtTime(0.012, ctx.currentTime, 0.7);
+    g.gain.setTargetAtTime(0.006, ctx.currentTime, 0.7);
     this._amb = { src, g };
   }
 

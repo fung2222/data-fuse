@@ -15,7 +15,7 @@ import './strings.js?v=1.2.3c';
 import { FuseGame, makeRng } from './logic.js?v=1.2.3d';
 import { aiChoose } from './ai.js';
 import { BoardView, cellPos } from './board.js';
-import { FuseAudio } from './audio.js?v=1.2.3';
+import { FuseAudio } from './audio.js?v=1.2.3i';
 import { loadFonts, fmt } from './labels.js';
 import { ComboAura, MergeHint, slideTrail } from './polish.js';
 
