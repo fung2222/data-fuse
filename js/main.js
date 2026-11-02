@@ -15,7 +15,7 @@ import './strings.js?v=1.2.3c';
 import { FuseGame, makeRng } from './logic.js?v=1.2.3d';
 import { aiChoose } from './ai.js';
 import { BoardView, cellPos } from './board.js';
-import { FuseAudio } from './audio.js?v=1.2.3i';
+import { FuseAudio } from './audio.js?v=1.2.3k';
 import { loadFonts, fmt } from './labels.js';
 import { ComboAura, MergeHint, slideTrail } from './polish.js';
 
@@ -172,7 +172,7 @@ function showAttract() {
 
 function beginRun(resume) {
   resetPlayView(true);
-  audio.init(); audio.startMusic(); audio.unduckMusic(); audio.startAmbient();
+  audio.init(); audio.startMusic(); audio.unduckMusic();
   const s = resume ? loadRun() : null;
   if (s) {
     S.game.restore(s.snap); S.history = s.history || []; S.undo = s.undo ?? UNDO_FREE;
@@ -384,7 +384,7 @@ async function revive() {
   S.game.restore(snap); board.sync(S.game, true); board.setDim(1); board.danger = 0.45;
   S.zone = zoneForTile(S.game.maxTile);
   applyZoneMod(S.zone);
-  setState('playing'); updateHUD(); saveRun(); audio.undo(); audio.unduckMusic(); audio.startAmbient();
+  setState('playing'); updateHUD(); saveRun(); audio.undo(); audio.unduckMusic();
   ui.toast(t('rewound'), 1400);
 }
 
@@ -530,7 +530,7 @@ window.addEventListener('keydown', (e) => {
   if (map[e.code]) S.lastDir = map[e.code];
 });
 
-function toggleMute() { audio.init(); const m = audio.toggleMute(); ui.setMuted(m); if (m) audio.stopAmbient(); else if (S.state === 'playing') audio.startAmbient(); }
+function toggleMute() { audio.init(); const m = audio.toggleMute(); ui.setMuted(m); if (m) audio.stopAmbient(); }
 ui.on('btn-start', () => { audio.init(); beginRun(false); });
 const __hub = readHub();
 if (shouldShowArcadeMenu(__hub)) { const b = document.getElementById('btn-arcade-menu'); if (b) b.classList.remove('hidden'); }

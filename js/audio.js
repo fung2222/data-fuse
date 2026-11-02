@@ -16,7 +16,7 @@ const FUSE_DRIVE = {
   roots: [45, 41, 48, 43],
   chords: [[0, 3, 7], [0, 4, 7], [0, 3, 7], [0, 5, 7]],
   kick: 'four',
-  hats: 'soft',
+  hats: false,
   bass: 'eighths',
   arp: true,
   pad: 0.015,
@@ -209,38 +209,41 @@ export class FuseAudio extends SynthAudio {
     this.duckMusic();
   }
 
-  // Soft noise bed under drive BGM (subtle neon hum, not chill pad)
-  startAmbient() {
-    if (!this.ctx || this._amb) return;
-    const ctx = this.ctx;
-    const src = ctx.createBufferSource();
-    src.buffer = this.noise;
-    src.loop = true;
-    const bp = ctx.createBiquadFilter();
-    bp.type = 'bandpass';
-    bp.frequency.value = 520;
-    bp.Q.value = 0.7;
-    const g = ctx.createGain();
-    g.gain.value = 0.0001;
-    src.connect(bp);
-    bp.connect(g);
-    g.connect(this.sfx);
-    src.start();
-    g.gain.setTargetAtTime(0.006, ctx.currentTime, 0.7);
-    this._amb = { src, g };
+  /** Clean drive loop: kick / bass / chords / arp only — no noise hats or snare hiss. */
+  playStep(step, time, s16) {
+    const ctx = this.ctx, out = this.musicFilter, P = this.preset;
+    const t = time - ctx.currentTime; if (t < -0.01) return;
+    const bar = Math.floor(step / 16) % 4, s = step % 16;
+    const root = P.roots[bar], chord = P.chords[bar];
+    const kickOn = P.kick === 'four' ? s % 4 === 0 : (s === 0 || s === 10);
+    if (kickOn) {
+      this.osc({ type: 'sine', f: 150, f2: 42, t, dur: 0.28, vol: P.kick === 'four' ? 0.55 : 0.4, out });
+      this.osc({ type: 'triangle', f: 900, f2: 120, t, dur: 0.02, vol: 0.1, out });
+    }
+    if (s === 4 || s === 12) {
+      // Tonal snap replaces the noise snare: still marks the backbeat without hiss.
+      this.osc({ type: 'triangle', f: 190, f2: 130, t, dur: 0.06, vol: 0.07, out });
+      this.osc({ type: 'square', f: 520, f2: 320, t, dur: 0.025, vol: 0.018, lp: 1800, out });
+    }
+    if (P.bass === 'eighths' && s % 2 === 0) {
+      const oct = (s % 8 === 6) ? 12 : 0;
+      this.osc({ type: 'sawtooth', f: mtof(root - 12 + oct), t, dur: s16 * 1.8, vol: 0.16, lp: 520 + (s % 4 === 0 ? 300 : 0), q: 5, a: 0.004, out });
+    } else if (P.bass === 'roots' && (s === 0 || s === 8 || s === 14)) {
+      this.osc({ type: 'triangle', f: mtof(root - 12), t, dur: s16 * (s === 14 ? 2 : 6), vol: 0.22, a: 0.01, out });
+    }
+    if (s === 0) chord.forEach(iv => {
+      for (const det of [-9, 9]) this.osc({ type: 'sawtooth', f: mtof(root + 12 + iv), t, dur: s16 * 16, vol: P.pad, a: 0.35, lp: 1100, detune: det, out });
+    });
+    const arpPattern = [0, 1, 2, 1, 0, 2, 1, 2];
+    if (P.arp === true) {
+      const iv = chord[arpPattern[s % 8]] + (s >= 8 ? 12 : 0);
+      this.osc({ type: 'triangle', f: mtof(root + 24 + iv), t, dur: s16 * 0.9, vol: this.level >= 2 ? 0.038 : 0.022, lp: 2200 + Math.sin(step / 10) * 900, q: 3, out, send: 0.25 });
+    }
+    if (s % 4 === 2) this.osc({ type: 'triangle', f: mtof(root + 36), t, dur: 0.02, vol: 0.012, out });
   }
 
-  stopAmbient(fade = 0.5) {
-    if (!this._amb) return;
-    const { src, g } = this._amb;
-    this._amb = null;
-    try {
-      g.gain.setTargetAtTime(0.0001, this.ctx.currentTime, fade / 3);
-      setTimeout(() => {
-        try {
-          src.stop();
-        } catch (_) {}
-      }, fade * 1000 + 80);
-    } catch (_) {}
-  }
+  // No noise bed: a looping hiss is uncomfortable on headphones. Keep the
+  // public methods so older callers don't break, but the BGM stays tonal.
+  startAmbient() {}
+  stopAmbient() { this._amb = null; }
 }

@@ -98,7 +98,7 @@ Also needed for Play: privacy options entry (`ads.privacyOptionsRequired` → bu
 
 ## Audio loudness + glow (cyber-kit v0.3.0, 2026-10-03)
 - Audio: kit loudness model (music ≈ −20 LUFS integrated, median SFX ≈ music level). This game uses the custom `FUSE_DRIVE` preset and `sfxTrimDb 7.5` in `js/audio.js`. Re-measure after changing sounds: `python3 ../cyber-kit/tests/loudness.py http://127.0.0.1:18940 <dir>:<AudioClass> --kit /cyber-kit` (see kit docs/API.md "Loudness"). Keep music −20 ± 1 LUFS and SFX/BGM 0 ± 2 dB.
-- 2026-11-02 sound pass: collision `merge()` reduced to one rounded sine body + triangle partial + one glass ping + short click + one optional sub (removed the detuned saw/noise stack). BGM hats changed to `soft`, top end capped at 14 kHz, ambient bed lowered 6 dB. Measured: music **−19.5 LUFS**, median SFX **−17.9 LUFS** (`+1.6 dB`), merge **−14.6**; peak **−2.4 dBFS**. Real phone listen still required.
+- 2026-11-02 sound pass: collision `merge()` reduced to one rounded sine body + triangle partial + one glass ping + short click + one optional sub (removed the detuned saw/noise stack). BGM `playStep` is now fully tonal — kick, bass, chords and a soft arp; **no noise hats, no noise snare and no ambient hiss**. Measured: music **−19.3 LUFS**, median SFX **−17.5 LUFS** (`+1.8 dB`), merge **−14.7**; peak **−2.7 dBFS**.
 - Glow: `createStage` values are the HIGH look; default is LOW (crisp). Shared pref `localStorage cyber.glow`, `?glow=low|high`. Pause screen has a GLOW: LOW/HIGH button (`ui.glowToggle(stage)`).
 
 
