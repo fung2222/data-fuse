@@ -457,7 +457,7 @@ function setPulseMeter(frac) {
 
 S.api = {
   resync: () => { board.sync(S.game, true); applyZoneMod(S.zone); updateHUD(); },
-  endlessTest: () => { const v = Array(SIZE * SIZE).fill(0); v[0] = v[1] = 131072; v[5] = 2; S.game.restore({ values: v, score: S.game.score, moves: S.game.moves, maxTile: 131072 }); S.zone = zoneForTile(131072); applyZoneMod(S.zone); board.sync(S.game, true); doMove('left'); },
+  endlessTest: () => { const v = Array(SIZE * SIZE).fill(0); v[0] = v[1] = 131072; v[5] = 2; S.game.restore({ values: v, score: S.game.score, moves: S.game.moves, maxTile: 131072 }); S.zone = zoneForTile(131072); applyZoneMod(S.zone); S.game.clearLock(); board.sync(S.game, true); doMove('left'); },
   move: (d) => doMove(d),
   pulse: (d) => tryPulse(d || S.lastDir),
   undo: () => undo(),

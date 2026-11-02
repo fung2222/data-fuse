@@ -1,6 +1,6 @@
 # DATA FUSE 數據熔合 — Handoff
 
-Status: **web build v1.2 — polish + ZONE MODS / PULSE FUSE / HINT** · live https://fung2222.github.io/data-fuse/ · not yet packaged for Android.
+Status: **web build v1.2.3 — polish + ZONE MODS / PULSE FUSE / HINT** · live https://fung2222.github.io/data-fuse/ · not yet packaged for Android.
 Part of CYBER ARCADE (see `fung2222/cyber-arcade/docs/ARCADE-HANDOFF.md` for the series rules: never port code from `sono`, AdMob policy, naming).
 
 ## 1. Design
@@ -52,7 +52,7 @@ js/labels.js        number textures (Orbitron, cached canvases)
 js/audio.js         FuseAudio (chill + combo/pulse/mod/ambient)
 js/polish.js        ComboAura, MergeHint, slideTrail
 js/main.js          states (attract/playing/paused/over), input, undo, milestones, effects, camera, saves, ads hooks
-vendor/cyber-kit/   cyber-kit v0.3.8 (includes three r169) — do not edit here; update from the kit repo
+vendor/cyber-kit/   cyber-kit v0.3.19 (includes three r169) — do not edit here; update from the kit repo
 tests/              logic.test.mjs, ai.bench.mjs, smoke.py
 privacy.html        zh-HK + EN privacy policy (localStorage only; future AdMob)
 ```
@@ -64,10 +64,11 @@ python3 -m http.server 18940          # from the parent folder
 node tests/logic.test.mjs             # rules: slides, double merges, no chain merge, spawn, game over, snapshot
 node tests/ai.bench.mjs               # AI reaches 2048 (≈3–4 ms / move)
 python tests/smoke.py [url] [outdir]  # Playwright: 412×915 touch + 1280×800 — start, swipe, keys, undo, pause,
-                                      # game over, rewind, continue after reload, demo, language toggle/persist,
+                                      # game over, rewind, continue after reload, demo, language via gear settings,
                                       # endless zone 13 (beyond 131072), zero console errors
+SMOKE_SHOTS=0 python tests/smoke.py    # same checks, skip PNGs (fast functional run on software WebGL)
 ```
-Last run 2026-10-02 (v1.1): logic ALL PASSED (incl. endless zone/curve tests) · smoke ALL PASSED (both viewports, zero console errors).
+Last run 2026-11-02 (v1.2.3): logic ALL PASSED · targeted smoke PASSED (language via settings, start, endless zone 13, zero console errors). Full two-viewport smoke is slow under SwiftShader; use `SMOKE_SHOTS=0` for routine runs.
 
 ## 6. Android / Capacitor packaging outline
 1. `npm init -y && npm i @capacitor/core @capacitor/cli @capacitor/android @capacitor/app @capacitor/haptics @capacitor-community/admob@^8` (Capacitor 8).
