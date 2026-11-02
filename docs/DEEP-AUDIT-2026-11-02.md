@@ -1,8 +1,20 @@
 # DATA FUSE — deep audit (2026-11-02)
 
-Status: **read-only audit; no gameplay code changed.**  
+Status: **audit completed; all five findings fixed in follow-up commits (see Fix status).**  
 Scope: `data-fuse` v1.2.3, 360 / 390 / 412 / 430 px, Playwright + pure-logic fuzz.  
 Purpose: list only problems that can be shown by a measurement, a reproducible run, or a logic case. This is the first deep pass after the shallow layout/doc pass.
+
+## Fix status (2026-11-02)
+
+| # | Finding | Commit | Result |
+|---|---|---|---|
+| 1 | Mute / bottom row overflow | `9d3c7dc` | 360/390/412 layout guard passes |
+| 2 | Pulse in LOCK CORE spent Undo | `26c8e06` | locked pulse rejected, Undo unchanged |
+| 3 | “下一熔合” label | `dc2127c` | label is now `下一區域 / NEXT ZONE` |
+| 4 | LOCK CORE dead-board detection | `ea93c83` | locked pair is not movable; dead board ends |
+| 5 | First run missing NEW RECORD | `b6244b9` | first positive run shows the badge |
+
+Regression tests: `node tests/logic.test.mjs`, `python tests/layout.py`, `python tests/pulse_lock.py`, `python tests/first_record.py` — all passed on 2026-11-02.
 
 ## Baseline checked
 
@@ -79,14 +91,10 @@ Fix direction: make `canMove()` ignore equal pairs that involve the locked tile,
 - No timer and no forced fail pressure fit the “relaxing commute” positioning.
 - Pure logic tests and AI bench are healthy; no console errors in the checked browser runs.
 
-## Not changed in this pass
+## Audit vs fixes
 
-No gameplay, CSS, strings or tests were modified. This commit is the audit only, so each fix can be reviewed and reverted separately.
+The audit itself changed no gameplay code. Each fix is a separate commit (table above), so any one can be reverted without disturbing the others.
 
-## Suggested next sequence
+## Follow-up
 
-1. Mute-row fit + 360/390 guard.
-2. Pulse lock probe + undo guard.
-3. `下一熔合` → `下一區域`.
-4. Lock deadlock `canMove` + test.
-5. First-run record (optional polish).
+All five items are fixed. Next deep-pass candidates are the soft spots that were not reproduced as bugs: Echo/drift visual sync under very fast input, and real-device audio/FPS validation.
