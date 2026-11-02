@@ -409,15 +409,17 @@ async function undo() {
 async function tryPulse(d) {
   if (S.state !== 'playing' || S.demo || ui.modalOpen) return false;
   if (S.undo <= 0) { audio.denied(); ui.toast(t('pulseNeed')); return false; }
-  // peek: would pulse work?
-  const probe = new FuseGame({ rng: () => 0 });
-  probe.restore(S.game.snapshot());
-  probe.lockedId = S.game.lockedId; probe.lockLeft = S.game.lockLeft; probe.nextId = S.game.nextId + 5000;
-  probe.scoreMult = S.game.scoreMult;
-  if (!probe.move(d, { pulse: true })) { audio.bump(); ui.toast(t('pulseNo')); return false; }
+  // Spend only when the real move succeeds. A probe clone cannot preserve the
+  // locked tile id, so it used to approve a pulse that _pulse() then rejected.
   S.undo--;
+  const ok = doMove(d, S.game, true, { pulse: true });
+  if (!ok) {
+    S.undo++; updateHUD(); saveRun();
+    ui.toast(t('pulseNo'));
+    return false;
+  }
   audio.pulseArm();
-  return doMove(d, S.game, true, { pulse: true });
+  return true;
 }
 
 function pause() { if (S.state !== 'playing') return; setState('paused'); audio.duckMusic(); audio.back(); }
