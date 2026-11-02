@@ -40,6 +40,19 @@
   .controls { margin-top: 14px; line-height: 1.9; }
   .controls div:not(.touch-hint) { display: none; }
 }
+/* 360–430 px: keep all five in-play controls inside the safe area; the tone-down
+   undo width + tighter gaps replace the old 398 px row that hid Mute. */
+@media (max-width: 430px) {
+  .df-bar { left: max(8px, env(safe-area-inset-left)); right: max(8px, env(safe-area-inset-right)); }
+  .df-bar .hud-buttons { gap: 4px; }
+  .df-undo { height: 44px; padding: 0 8px 0 6px; gap: 5px; }
+  .df-undo-txt b { font-size: 14px; letter-spacing: 1px; }
+  .df-undo-txt small { display: none; }
+}
+@media (max-width: 374px) {
+  .df-bar .hud-buttons { gap: 3px; }
+  .df-bar .icon-btn { width: 40px; height: 40px; padding: 8px; }
+}
 @media (max-height: 560px) and (min-width: 761px) {
   .controls { display: none; }
 }

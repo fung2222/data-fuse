@@ -47,7 +47,8 @@ python3 -m http.server 18940
 # 開 http://127.0.0.1:18940/data-fuse/
 node data-fuse/tests/logic.test.mjs        # 規則測試
 node data-fuse/tests/ai.bench.mjs          # AI 基準
-python data-fuse/tests/smoke.py            # 無頭瀏覽器測試 (Playwright)
+python data-fuse/tests/smoke.py          # 無頭瀏覽器測試 (Playwright)
+python data-fuse/tests/layout.py         # 360/390/412 HUD 底部控制唔可以出界
 ```
 
 ## 文件 Docs

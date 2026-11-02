@@ -68,6 +68,7 @@ node tests/ai.bench.mjs               # AI reaches 2048 (≈3–4 ms / move)
 python tests/smoke.py [url] [outdir]  # Playwright: 412×915 touch + 1280×800 — start, swipe, keys, undo, pause,
                                       # game over, rewind, continue after reload, demo, language via gear settings,
                                       # endless zone 13 (beyond 131072), zero console errors
+python tests/layout.py [url] [outdir] # 360/390/412 HUD guard: Mute + five in-play controls fully inside viewport
 SMOKE_SHOTS=0 python tests/smoke.py    # same checks, skip PNGs (fast functional run on software WebGL)
 ```
 Last run 2026-11-02 (v1.2.3): logic ALL PASSED · targeted smoke PASSED (language via settings, start, endless zone 13, zero console errors). Full two-viewport smoke is slow under SwiftShader; use `SMOKE_SHOTS=0` for routine runs.
