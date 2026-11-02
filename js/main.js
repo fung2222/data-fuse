@@ -11,7 +11,7 @@ import {
   BOARD_Y, BOARD_HALF, ADS, colorOf, tierOf, zoneForTile, nextMilestone, prevMilestone, fourChanceFor,
   modifierFor, SURGE_UNDO_BONUS, PULSE_HOLD_MS, T_ECHO_SPAWN,
 } from './config.js';
-import './strings.js';
+import './strings.js?v=1.2.3c';
 import { FuseGame, makeRng } from './logic.js';
 import { aiChoose } from './ai.js';
 import { BoardView, cellPos } from './board.js';

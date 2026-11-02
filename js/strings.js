@@ -2,7 +2,7 @@
 import { i18n } from 'cyber-kit';
 i18n.add({
   'doc.title': ['數據熔合 DATA FUSE · 賽博朋克 3D 合併解壓', 'DATA FUSE · cyberpunk 3D merge puzzle'],
-  score: ['分數', 'SCORE'], best: ['最高分', 'BEST'], zone: ['區域', 'ZONE'], core: ['核心', 'CORE'], nextFuse: ['下一熔合', 'NEXT FUSE'],
+  score: ['分數', 'SCORE'], best: ['最高分', 'BEST'], zone: ['區域', 'ZONE'], core: ['核心', 'CORE'], nextZone: ['下一區域', 'NEXT ZONE'],
   undo: ['復原', 'UNDO'], undoS: ['UNDO · Z', 'Z'], undoTip: ['復原 (Z / Backspace)', 'Undo (Z / Backspace)'],
   newTip: ['新一局 (R)', 'New game (R)'], pauseTip: ['暫停 (P / Esc)', 'Pause (P / Esc)'], muteTip: ['靜音 (M)', 'Mute (M)'],
   title: ['數據熔合', 'DATA FUSE'], titleEn: ['DATA FUSE', '數據熔合'],

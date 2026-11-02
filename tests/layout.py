@@ -42,9 +42,11 @@ with sync_playwright() as p:
             out[id] = {x:r.x, right:r.right, w:r.width, visible:Math.max(0, Math.min(innerWidth, r.right) - Math.max(0, r.left))};
           }
           const bar = document.querySelector('.df-bar').getBoundingClientRect();
-          return {vw:innerWidth, buttons:out, bar:{x:bar.x,right:bar.right}, docW:document.documentElement.scrollWidth};
+          return {vw:innerWidth, buttons:out, bar:{x:bar.x,right:bar.right}, docW:document.documentElement.scrollWidth,
+                  progressLabel:document.querySelector('.lp-title').textContent.trim()};
         }""")
         print(name, data)
+        check(data['progressLabel'] in ('下一區域', 'NEXT ZONE'), f'{name}: progress label names the next zone')
         check(data['docW'] <= w, f'{name}: no horizontal page overflow')
         for bid, r in data['buttons'].items():
             check(r['x'] >= 0 and r['right'] <= w + 0.5, f'{name}: {bid} fully inside viewport')
