@@ -50,6 +50,7 @@ node data-fuse/tests/ai.bench.mjs          # AI 基準
 python data-fuse/tests/smoke.py          # 無頭瀏覽器測試 (Playwright)
 python data-fuse/tests/layout.py         # 360/390/412 HUD 底部控制唔可以出界
 python data-fuse/tests/pulse_lock.py     # LOCK CORE 區脈衝唔可以白扣復原
+python data-fuse/tests/first_record.py   # 第一次玩都要顯示 NEW RECORD
 ```
 
 ## 文件 Docs

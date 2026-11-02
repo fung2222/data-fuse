@@ -255,7 +255,7 @@ function doMove(d, game = S.game, live = true, { pulse = false } = {}) {
   }
 
   if (!live) return true;
-  if (rec.gained) { S.game.score > store.best && !S.newRecord && store.best > 0 && (S.newRecord = true); }
+  if (rec.gained && !S.newRecord && S.game.score > store.best) S.newRecord = true;
 
   // DRIFT after a merge swipe
   if (S.mod === 'drift' && rec.merges.length && !game.over) {
