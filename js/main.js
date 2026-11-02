@@ -12,7 +12,7 @@ import {
   modifierFor, SURGE_UNDO_BONUS, PULSE_HOLD_MS, T_ECHO_SPAWN,
 } from './config.js';
 import './strings.js?v=1.2.3c';
-import { FuseGame, makeRng } from './logic.js';
+import { FuseGame, makeRng } from './logic.js?v=1.2.3d';
 import { aiChoose } from './ai.js';
 import { BoardView, cellPos } from './board.js';
 import { FuseAudio } from './audio.js?v=1.2.3';
@@ -151,6 +151,11 @@ function applyZoneMod(zone, { announce = false } = {}) {
     ui.toast(t('mod.' + S.mod) + ' · ' + t('mod.' + S.mod + 'S'), 2400);
   }
   paintModChip();
+  // Arming LOCK CORE can be the move that removes the last legal move.
+  if (S.state === 'playing' && !S.game.over && !S.game.canMove()) {
+    S.game.over = true;
+    gameOver();
+  }
 }
 
 function prefillAttract() {
@@ -275,6 +280,7 @@ function doMove(d, game = S.game, live = true, { pulse = false } = {}) {
   if (game.maxTile > S.bestTile) { S.bestTile = game.maxTile; store.setNum('bestTile', S.bestTile); }
   const empty = game.empty().length;
   board.danger = empty <= 1 ? 1 : empty <= 3 ? 0.45 : 0;
+  game.over = !game.canMove(); // re-check after drift / lock arming
   saveRun();
   if (game.over) gameOver();
   return true;

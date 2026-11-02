@@ -56,6 +56,20 @@ const z = new FuseGame({ rng: makeRng(3) }); z.fourChance = 1; z.reset(); eq(z.v
 }
 {
   const g2 = new FuseGame({ rng: makeRng(5) });
+  g2.restore({ values: [512, 512, 2, 4, 4, 2, 4, 2, 2, 4, 2, 4, 4, 2, 4, 2], score: 0, moves: 0, maxTile: 512 });
+  g2.armLock(1);
+  eq(g2.canMove(), false, 'lock arming can end a full board with only a locked pair');
+}
+{
+  const g2 = new FuseGame({ rng: makeRng(5) });
+  g2.restore({ values: [8, 8, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], score: 0, moves: 0, maxTile: 8 });
+  g2.armLock(1);
+  const t = g2.cells[0][0];
+  g2.lockedId = t.id; g2.lockLeft = 1;
+  eq(g2.canMove(), true, 'locked pair still allows another movable tile');
+}
+{
+  const g2 = new FuseGame({ rng: makeRng(5) });
   g2.restore({ values: [2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], score: 0, moves: 0, maxTile: 2 });
   g2.setSurge(true);
   const rr = g2.move('left');

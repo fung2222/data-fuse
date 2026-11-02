@@ -189,10 +189,17 @@ export class FuseGame {
   }
 
   canMove() {
+    // A locked tile is pinned: it can neither slide nor merge. Ignore it as a
+    // source and as an equal neighbour, otherwise a board whose only pair is
+    // the locked core reports "movable" but every slide and pulse returns null.
     for (let r = 0; r < SIZE; r++) for (let c = 0; c < SIZE; c++) {
-      const t = this.cells[r][c]; if (!t) return true;
-      if (c < SIZE - 1 && this.cells[r][c + 1] && this.cells[r][c + 1].v === t.v) return true;
-      if (r < SIZE - 1 && this.cells[r + 1][c] && this.cells[r + 1][c].v === t.v) return true;
+      const t = this.cells[r][c];
+      if (!t || this._isLocked(t)) continue;
+      const freeOrEqual = (o) => !o || (!this._isLocked(o) && o.v === t.v);
+      if ((c < SIZE - 1 && freeOrEqual(this.cells[r][c + 1])) ||
+          (c > 0 && freeOrEqual(this.cells[r][c - 1])) ||
+          (r < SIZE - 1 && freeOrEqual(this.cells[r + 1][c])) ||
+          (r > 0 && freeOrEqual(this.cells[r - 1][c]))) return true;
     }
     return false;
   }

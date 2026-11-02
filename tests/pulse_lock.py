@@ -69,6 +69,19 @@ with sync_playwright() as p:
     check(st2['undo'] == 1, 'normal pulse spends one Undo')
     check(st2['moves'] == 1, 'normal pulse counts one move')
     check(st2['values'][0] == 4, 'normal pulse leaves a 4 in place')
+
+    # Arming LOCK CORE on a full board whose only pair is the locked core must
+    # end the run instead of leaving the player with no legal input.
+    pg.evaluate("""() => {
+      const S = window.__fuse;
+      S.game.restore({values:[512,512,2,4, 4,2,4,2, 2,4,2,4, 4,2,4,2], score:0, moves:0, maxTile:512});
+      S.undo = 2; S.zone = 4; S.mod = null;
+      S.api.resync();
+    }""")
+    pg.wait_for_timeout(900)
+    st3 = pg.evaluate("() => ({state:__fuse.state, over:__fuse.game.over, canMove:__fuse.game.canMove()})")
+    check(st3['over'] is True, 'lock arming sets game over on a dead board')
+    check(st3['state'] == 'over', 'lock dead board shows the game-over screen')
     check(len(errors) == 0, 'zero console errors')
     b.close()
 
