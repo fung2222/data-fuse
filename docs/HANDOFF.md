@@ -3,6 +3,8 @@
 Status: **web build v1.2.3 — polish + ZONE MODS / PULSE FUSE / HINT** · live https://fung2222.github.io/data-fuse/ · not yet packaged for Android.
 Part of CYBER ARCADE (see `fung2222/cyber-arcade/docs/ARCADE-HANDOFF.md` for the series rules: never port code from `sono`, AdMob policy, naming).
 
+**Deep audit 2026-11-02:** read `docs/DEEP-AUDIT-2026-11-02.md` before touching the HUD row, `tryPulse`, `canMove`, or the next-milestone label.
+
 ## 1. Design
 A slide-and-merge number puzzle (the classic 4×4 merge genre) rebuilt from scratch as a relaxing commute game:
 - Glass data cubes on a floating holo board above a rainy neon Kowloon street.

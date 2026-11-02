@@ -52,6 +52,7 @@ python data-fuse/tests/smoke.py            # 無頭瀏覽器測試 (Playwright)
 
 ## 文件 Docs
 - [docs/HANDOFF.md](docs/HANDOFF.md) — 設計、調校常數、檔案地圖、測試、Android 打包、廣告位置
+- [docs/DEEP-AUDIT-2026-11-02.md](docs/DEEP-AUDIT-2026-11-02.md) — deep audit：玩家體驗／規則／HUD findings（read-only）
 - [privacy.html](privacy.html) — 私隱政策 Privacy policy
 
 屬於 [CYBER ARCADE](https://github.com/fung2222/cyber-arcade) 系列。
